@@ -36,6 +36,17 @@
   padding: 10px 20px;
 }
 
+.RichEditor-editor .blockStyle {
+  padding: 10px;
+  cursor: pointer;
+  /* font-family: 'Hoefler Text', 'Georgia', serif; */
+  font-style: italic;
+}
+
+.RichEditor-editor .blockStyle:hover {
+  background-color: hsla(0, 11%, 98%, 0.991);
+}
+
 .RichEditor-editor .public-DraftStyleDefault-pre {
   background-color: rgba(0, 0, 0, 0.05);
   font-family: 'Inconsolata', 'Menlo', 'Consolas', monospace;

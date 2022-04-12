@@ -1,4 +1,4 @@
-import Paragraph from '../modules/Paragraph';
+import Block from '../modules/Block';
 import Text from '../modules/Text';
 // const lcs = (oldText, newText) => {
 //   const oldTextLength = oldText.length;
@@ -93,22 +93,70 @@ const textDiff = (oldText, newText, cursorPosition) => {
   // Single character diff (Delete or Insert)
   if (maxSize - minSize === 1) {
     if (oldTextLength > newText.length) {
-      let res = Paragraph.getChainFamily(
-        oldText.texts,
-        cursorPosition + 1,
-        'delete'
-      );
+      let res = Block.getChainFamily(oldText.texts, cursorPosition, 'delete');
       return { ...res, type: 'delete' };
     } else {
-      let res = Paragraph.getChainFamily(
+      let res = Block.getChainFamily(
         oldText.texts,
-        cursorPosition,
+        cursorPosition === minSize &&
+          oldText.getContent().slice(0, minSize) === newText.slice(0, minSize)
+          ? cursorPosition
+          : cursorPosition - 1,
         'insert'
       );
+
       return {
         ...res,
-        target: new Text('Tristan', newText[cursorPosition - 1]),
+        target: new Text(
+          'Tristan',
+          newText[
+            cursorPosition === minSize &&
+            oldText.getContent().slice(0, minSize) === newText.slice(0, minSize)
+              ? cursorPosition
+              : cursorPosition - 1
+          ]
+        ),
         type: 'insert',
+      };
+    }
+  } else if (maxSize - minSize >= 1) {
+    if (oldTextLength > newText.length) {
+      let { target } = Block.getChainFamily(
+        oldText.texts,
+        cursorPosition,
+        'index'
+      );
+      let deleteMap = oldText.getDeleteMap(target.next, maxSize - minSize);
+      return { type: 'deleteMultiple', target: deleteMap };
+    } else {
+      let res = Block.getChainFamily(
+        oldText.texts,
+        cursorPosition === minSize
+          ? cursorPosition
+          : cursorPosition - (maxSize - minSize),
+        'insert'
+      );
+      let variance;
+      if (cursorPosition === minSize) {
+        variance = newText.slice(
+          cursorPosition,
+          cursorPosition + (maxSize - minSize)
+        );
+      } else {
+        variance = newText.slice(
+          cursorPosition - (maxSize - minSize),
+          cursorPosition
+        );
+      }
+
+      let insertMap = [];
+      for (let i = 0; i < variance.length; i++) {
+        insertMap.push(new Text('Tristan', variance[i]));
+      }
+      return {
+        ...res,
+        target: insertMap,
+        type: 'insertMultiple',
       };
     }
   }

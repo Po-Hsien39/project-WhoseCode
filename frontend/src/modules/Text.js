@@ -1,9 +1,7 @@
 class Text {
-  static clock = 0;
+  static clock = 3;
   constructor(user, word, clock) {
-    console.log('clock: ', clock);
     this.clock = clock || Text.clock++;
-    console.log(this.clock);
     this.user = user;
     this.prev = null;
     this.next = null;
@@ -30,8 +28,6 @@ class Text {
     Text.clock = Math.max(Text.clock, clock);
   }
   toString() {
-    console.log(this);
-    console.log({ clock: this.clock, user: this.user, content: this.content });
     return { clock: this.clock, user: this.user, content: this.content };
   }
 }
