@@ -94,28 +94,24 @@ const textDiff = (oldText, newText, cursorPosition) => {
   if (maxSize - minSize === 1) {
     if (oldTextLength > newText.length) {
       let res = Block.getChainFamily(oldText.texts, cursorPosition, 'delete');
-      return { ...res, type: 'delete' };
+      return { ...res, cursor: cursorPosition + 1, type: 'delete' };
     } else {
-      let res = Block.getChainFamily(
-        oldText.texts,
+      let cursor;
+      if (
         cursorPosition === minSize &&
-          oldText.getContent().slice(0, minSize) === newText.slice(0, minSize)
-          ? cursorPosition
-          : cursorPosition - 1,
-        'insert'
-      );
+        oldText.getContent().slice(0, minSize) === newText.slice(0, minSize)
+      ) {
+        cursor = cursorPosition;
+      } else {
+        cursor = cursorPosition - 1;
+      }
+
+      let res = Block.getChainFamily(oldText.texts, cursor, 'insert');
 
       return {
         ...res,
-        target: new Text(
-          'Tristan',
-          newText[
-            cursorPosition === minSize &&
-            oldText.getContent().slice(0, minSize) === newText.slice(0, minSize)
-              ? cursorPosition
-              : cursorPosition - 1
-          ]
-        ),
+        cursor,
+        target: new Text('Tristan', newText[cursor]),
         type: 'insert',
       };
     }
@@ -127,27 +123,28 @@ const textDiff = (oldText, newText, cursorPosition) => {
         'index'
       );
       let deleteMap = oldText.getDeleteMap(target.next, maxSize - minSize);
-      return { type: 'deleteMultiple', target: deleteMap };
+      return {
+        type: 'deleteMultiple',
+        target: deleteMap,
+        cursor: cursorPosition + (maxSize - minSize),
+      };
     } else {
-      let res = Block.getChainFamily(
-        oldText.texts,
-        cursorPosition === minSize
-          ? cursorPosition
-          : cursorPosition - (maxSize - minSize),
-        'insert'
-      );
       let variance;
+      let cursor;
       if (cursorPosition === minSize) {
+        cursor = cursorPosition;
         variance = newText.slice(
           cursorPosition,
           cursorPosition + (maxSize - minSize)
         );
       } else {
+        cursor = cursorPosition - (maxSize - minSize);
         variance = newText.slice(
           cursorPosition - (maxSize - minSize),
           cursorPosition
         );
       }
+      let res = Block.getChainFamily(oldText.texts, cursor, 'insert');
 
       let insertMap = [];
       for (let i = 0; i < variance.length; i++) {
@@ -155,6 +152,7 @@ const textDiff = (oldText, newText, cursorPosition) => {
       }
       return {
         ...res,
+        cursor,
         target: insertMap,
         type: 'insertMultiple',
       };

@@ -92,7 +92,7 @@ class Article {
     while (current !== null) {
       structure.push({
         id: current.uId,
-        deleted: current.isDeleted,
+        isDeleted: current.isDeleted,
         content: current.getContent(),
       });
       current = current.next;
@@ -118,13 +118,13 @@ class Article {
     return rowNum;
   }
   rowNumToId(rowNum) {
-    let current = this.blocks.next;
-    while (current !== null) {
-      if (rowNum === 0) return current.uId;
-      if (!current.isDeleted) rowNum--;
-      current = current.next;
+    let current = this.blocks;
+    let index = -1;
+    while (index !== rowNum) {
+      if (!current.isDeleted && current.uId) index++;
+      if (index !== rowNum) current = current.next;
     }
-    return null;
+    return current.uId;
   }
 }
 

@@ -39,7 +39,7 @@ class Block {
   }
 
   insertMultiple({ prev, next, target, fromOutside }) {
-    if (fromOutside) Text.updateClock(target.slice(-1)[0]);
+    if (fromOutside) Text.updateClock(target.slice(-1)[0].clock);
     let currentKey = this.texts;
     while (true) {
       if (Text.compare(prev, currentKey)) {
@@ -74,26 +74,31 @@ class Block {
     let currentKey = this.texts;
     while (currentKey.next !== null) {
       if (Text.compare(target, currentKey)) {
-        currentKey.deleted = true;
+        currentKey.isDeleted = true;
         break;
       }
       currentKey = currentKey.next;
     }
   }
 
-  deleteMultiple({ target }) {
+  deleteMultiple({ target, currentCursor }) {
     let currentKey = this.texts;
+    let textLen = 0;
+    let removeCnt = 0;
     while (target.length) {
       let targetKey = target.shift();
       while (true) {
+        if (currentKey.content && !currentKey.isDeleted) textLen += 1;
         if (Text.compare(targetKey, currentKey)) {
-          currentKey.deleted = true;
+          if (textLen <= currentCursor) removeCnt++;
+          currentKey.isDeleted = true;
           currentKey = currentKey.next;
           break;
         }
         currentKey = currentKey.next;
       }
     }
+    return removeCnt;
   }
 
   showStructure() {
@@ -103,7 +108,7 @@ class Block {
       structure.push({
         clock: current.clock,
         content: current.content,
-        deleted: current.deleted,
+        isDeleted: current.isDeleted,
       });
       current = current.next;
     }
@@ -114,7 +119,7 @@ class Block {
     let content = '';
     let current = this.texts.next;
     while (current.next !== null) {
-      if (!current.deleted) content += current.content;
+      if (!current.isDeleted) content += current.content;
       current = current.next;
     }
     return content;
@@ -126,7 +131,7 @@ class Block {
   getDeleteMap(target, length) {
     let deleteMap = [];
     while (length > 0) {
-      if (!target.deleted) {
+      if (!target.isDeleted) {
         deleteMap.push(target);
         length--;
       }
@@ -154,13 +159,13 @@ class Block {
     let index = 0;
     while (index !== id) {
       parentNode = parentNode.next;
-      if (!parentNode.deleted) index++;
+      if (!parentNode.isDeleted) index++;
     }
     if (status === 'insert') {
       return { prev: parentNode, next: parentNode.next };
     } else if (status === 'delete') {
       parentNode = parentNode.next;
-      while (parentNode.deleted) {
+      while (parentNode.isDeleted) {
         parentNode = parentNode.next;
       }
       // return { prev: parentNode, next: parentNode.next.next };

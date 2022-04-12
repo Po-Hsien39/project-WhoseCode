@@ -5,7 +5,7 @@ import Text from '../modules/Text';
 import Block from '../modules/Block';
 import Article from '../modules/Article';
 import { useStatus } from '../hook/useStatus';
-import { List, Repeat } from 'immutable';
+import { List } from 'immutable';
 import {
   Editor,
   EditorState,
@@ -15,8 +15,9 @@ import {
   genKey,
   ContentState,
   ContentBlock,
-  CharacterMetadata,
   getDefaultKeyBinding,
+  SelectionState,
+  Modifier,
 } from 'draft-js';
 
 const DraftJSRichTextEditor = () => {
@@ -33,61 +34,99 @@ const DraftJSRichTextEditor = () => {
     if (socket) {
       socket.emit('joinRoom');
       socket.on('newEvent', (event) => {
-        console.log(event);
-        const blockId = event.block;
-        const targetBlock = content.getBlockFromId(blockId);
-        if (event && event.type === 'insert') {
-          Text.updateClock(event.target.clock);
-          targetBlock.insertKey({ ...event, fromOutside: true });
-        } else if (event && event.type === 'insertMultiple') {
-          targetBlock.insertMultiple({ ...event, fromOutside: true });
-        } else if (event && event.type === 'delete') {
-          targetBlock.deleteKey(event);
-        } else if (event && event.type === 'deleteMultiple') {
-          targetBlock.deleteMultiple(event);
-        } else if (event && event.type === 'changeStyle') {
-          targetBlock.style = event.style;
-        } else if (event && event.type === 'createBlock') {
-          const block = content.createBlock({ ...event, fromOutside: true });
-          const newBlock = new ContentBlock({
-            key: genKey(),
-            type: 'unstyled',
-            text: '',
-            depth: 0,
-            characterList: List(),
-          });
-          setEditorState((editorState) => {
-            const blocks = editorState.getCurrentContent().getBlocksAsArray();
+        setEditorState((editorState) => {
+          console.log(event);
+          const blockId = event.block;
+          const targetBlock = content.getBlockFromId(blockId);
+          const blockNum = content.idToRowNum(blockId);
+          const blocks = editorState.getCurrentContent().getBlocksAsArray();
+          const selection = editorState.getSelection();
+          let newSelection = {
+            anchorKey: selection.getAnchorKey(),
+            anchorOffset: selection.getAnchorOffset(),
+            focusKey: selection.getFocusKey(),
+            focusOffset: selection.getFocusOffset(),
+            isBackward: selection.isBackward,
+          };
+          let newRaws = convertToRaw(editorState.getCurrentContent());
+          let newContent = null;
+          let deleteNum = 0;
+          if (event && event.type === 'insert') {
+            Text.updateClock(event.target.clock);
+            targetBlock.insertKey({ ...event, fromOutside: true });
+            newRaws.blocks[blockNum].text = targetBlock.getContent();
+            newContent = convertFromRaw(newRaws);
+          } else if (event && event.type === 'insertMultiple') {
+            console.log('insertMultiple');
+            targetBlock.insertMultiple({ ...event, fromOutside: true });
+            newRaws.blocks[blockNum].text = targetBlock.getContent();
+            newContent = convertFromRaw(newRaws);
+          } else if (event && event.type === 'delete') {
+            targetBlock.deleteKey(event);
+            newRaws.blocks[blockNum].text = targetBlock.getContent();
+            newContent = convertFromRaw(newRaws);
+          } else if (event && event.type === 'deleteMultiple') {
+            deleteNum = targetBlock.deleteMultiple({
+              target: event.target,
+              currentCursor: newSelection.anchorOffset,
+            });
+            newRaws.blocks[blockNum].text = targetBlock.getContent();
+            newContent = convertFromRaw(newRaws);
+          } else if (event && event.type === 'changeStyle') {
+            targetBlock.style = event.style;
+            newRaws.blocks[blockNum].type = targetBlock.style;
+            newContent = convertFromRaw(newRaws);
+          } else if (event && event.type === 'createBlock') {
+            const block = content.createBlock({ ...event, fromOutside: true });
+            const newBlock = new ContentBlock({
+              key: genKey(),
+              type: 'unstyled',
+              text: '',
+              depth: 0,
+              characterList: List(),
+            });
             blocks.splice(block + 1, 0, newBlock);
-            let newContent = ContentState.createFromBlockArray(blocks);
-            return EditorState.forceSelection(
-              EditorState.createWithContent(newContent),
-              editorState.getSelection()
-            );
-          });
-          return;
-        } else if (event && event.type === 'removeBlock') {
-          const targetBlock = event.target;
-          content.removeBlock(targetBlock);
-          const blockIndex = content.idToRowNum(targetBlock);
-          setEditorState((editorState) => {
-            const blocks = editorState.getCurrentContent().getBlocksAsArray();
+            newContent = ContentState.createFromBlockArray(blocks);
+          } else if (event && event.type === 'removeBlock') {
+            const targetBlock = event.target;
+            content.removeBlock(targetBlock);
+            const blockIndex = content.idToRowNum(targetBlock);
             blocks.splice(blockIndex, 1);
-            const newContent = ContentState.createFromBlockArray(blocks);
-            return EditorState.createWithContent(newContent);
-          });
-          return;
-        } else {
-          console.log('unknown event');
-          return;
-        }
-        setEditorState((prev) => {
-          let newRaws = convertToRaw(prev.getCurrentContent());
-          let blockNum = content.idToRowNum(blockId);
-          newRaws.blocks[blockNum].text = targetBlock.getContent();
-          newRaws.blocks[blockNum].type = targetBlock.style;
-          const editor = EditorState.createWithContent(convertFromRaw(newRaws));
-          return EditorState.forceSelection(editor, prev.getSelection());
+            newContent = ContentState.createFromBlockArray(blocks);
+          } else {
+            console.log('unknown event');
+            return;
+          }
+          // TODO: need to handle when the user select from back to front
+          const currentBlockIndex = editorState
+            .getCurrentContent()
+            .getBlockMap()
+            .keySeq()
+            .findIndex((k) => k === newSelection.anchorKey);
+          if (blockNum === currentBlockIndex) {
+            if (event.type === 'removeBlock') {
+              newSelection.anchorKey = newRaws.blocks[blockNum - 1].key;
+              newSelection.focusKey = newRaws.blocks[blockNum - 1].key;
+              newSelection.anchorOffset +=
+                newRaws.blocks[blockNum - 1].text.length;
+              newSelection.focusOffset +=
+                newRaws.blocks[blockNum - 1].text.length;
+            } else if (
+              event.cursor < newSelection.anchorOffset ||
+              (event.cursor === newSelection.anchorOffset && event.rowDiff <= 0)
+            ) {
+              newSelection.anchorOffset += event.rowDiff;
+              newSelection.focusOffset += event.rowDiff;
+            } else if (event.cursor > newSelection.anchorOffset && deleteNum) {
+              newSelection.anchorOffset -= deleteNum;
+              newSelection.focusOffset -= deleteNum;
+            }
+          }
+
+          return EditorState.forceSelection(
+            EditorState.createWithContent(newContent),
+            new SelectionState(newSelection)
+          );
         });
       });
     }
@@ -107,6 +146,7 @@ const DraftJSRichTextEditor = () => {
       .keySeq()
       .findIndex((k) => k === endBlockKey);
     let newRaws = convertToRaw(editorState.getCurrentContent());
+    console.log(newRaws);
     const blocksNum = newRaws.blocks.length;
     let selectionState = editorState.getSelection();
     const startIndex = selectionState.getStartOffset();
@@ -129,14 +169,14 @@ const DraftJSRichTextEditor = () => {
             style: content.getBlock(startBlockIndex).style,
             type: 'changeStyle',
             block: content.getBlock(startBlockIndex).uId,
+            cursor: null,
           });
-        } else {
-          handleSingleBlockEditing(
-            newRaws.blocks[startBlockIndex].text,
-            startIndex,
-            startBlockIndex
-          );
         }
+        handleSingleBlockEditing(
+          newRaws.blocks[startBlockIndex].text,
+          startIndex,
+          startBlockIndex
+        );
       }
     }
     const editor = EditorState.createWithContent(convertFromRaw(newRaws));
@@ -157,6 +197,7 @@ const DraftJSRichTextEditor = () => {
       targetBlock.insertKey(diff);
       socket.emit('editEvent', {
         ...diff,
+        rowDiff: 1,
         block: targetBlock.uId,
         prev: diff.prev.toString(),
         target: diff.target.toString(),
@@ -168,6 +209,7 @@ const DraftJSRichTextEditor = () => {
       socket.emit('editEvent', {
         ...diff,
         target,
+        rowDiff: diff.target.length,
         prev: diff.prev.toString(),
         next: diff.next.toString(),
         block: targetBlock.uId,
@@ -175,17 +217,19 @@ const DraftJSRichTextEditor = () => {
     } else if (diff && diff.type === 'delete') {
       targetBlock.deleteKey(diff);
       socket.emit('editEvent', {
+        ...diff,
         block: targetBlock.uId,
+        rowDiff: -1,
         target: diff.target.toString(),
-        type: 'delete',
       });
     } else if (diff && diff.type === 'deleteMultiple') {
       const target = diff.target.map((i) => i.toString());
       targetBlock.deleteMultiple(diff);
       socket.emit('editEvent', {
+        ...diff,
         block: targetBlock.uId,
         target,
-        type: 'deleteMultiple',
+        rowDiff: -diff.target.length,
       });
     } else {
       console.log('No status');
@@ -212,6 +256,15 @@ const DraftJSRichTextEditor = () => {
   };
 
   const toggleInlineStyle = (inlineStyle) => {
+    console.log(inlineStyle);
+    console.log(
+      convertToRaw(
+        RichUtils.toggleInlineStyle(
+          editorState,
+          inlineStyle
+        ).getCurrentContent()
+      )
+    );
     onChange(RichUtils.toggleInlineStyle(editorState, inlineStyle));
   };
 
@@ -222,18 +275,21 @@ const DraftJSRichTextEditor = () => {
       .getBlockMap()
       .keySeq()
       .findIndex((k) => k === editorState.getSelection().getStartKey());
+    const selectionState = editorState.getSelection();
+    const startIndex = selectionState.getStartOffset();
+    const endIndex = selectionState.getEndOffset();
+    let raws = convertToRaw(editorState.getCurrentContent());
     if (e.key === 'Enter') {
-      const selectionState = editorState.getSelection();
-      const startIndex = selectionState.getStartOffset();
-      let raws = convertToRaw(editorState.getCurrentContent());
       const newText = raws.blocks[startBlockIndex].text.slice(0, startIndex);
       // First handle the previous block
       handleSingleBlockEditing(newText, startIndex, startBlockIndex);
-
       let newId = content.createBlock({ startBlockIndex });
       socket.emit('editEvent', {
         type: 'createBlock',
         target: { uId: newId },
+        block: content.rowNumToId(startBlockIndex),
+        blockDiff: 1,
+        cursor: startIndex,
         prev: content.getBlock(startBlockIndex).toString(),
         next: Article.getNextBlock(
           content.getBlock(startBlockIndex)
@@ -241,14 +297,19 @@ const DraftJSRichTextEditor = () => {
       });
     } else if (
       e.key === 'Backspace' &&
-      editorState.getSelection().getStartOffset() === 0 && // if cursor is at the start of the block
-      startBlockIndex !== 0 // if cursor is not at the start of the first block
+      startIndex === 0 && // if cursor is at the start of the block
+      startBlockIndex !== 0 && // if cursor is not at the start of the first block
+      raws.blocks[startBlockIndex].type === 'unstyled' && // This is not remove style
+      endIndex === 0
     ) {
       let targetBlock = content.rowNumToId(startBlockIndex);
       content.removeBlock(targetBlock);
       socket.emit('editEvent', {
         type: 'removeBlock',
         target: targetBlock,
+        cursor: startIndex,
+        block: targetBlock,
+        blockDiff: -1,
       });
     }
     return getDefaultKeyBinding(e);
@@ -260,7 +321,36 @@ const DraftJSRichTextEditor = () => {
 
   return (
     <div className="RichEditor-root">
-      <button>Click me</button>
+      <button
+        onClick={() => {
+          setEditorState((prevEditorState) => {
+            let newContent = Modifier.replaceText(
+              editorState.getCurrentContent(),
+              prevEditorState.getSelection(),
+              'this is a test'
+            );
+            let newState = EditorState.push(
+              editorState,
+              newContent,
+              'insert-characters'
+            );
+            let selection = prevEditorState.getSelection();
+            let blocks = prevEditorState.getCurrentContent().getBlocksAsArray();
+            return EditorState.forceSelection(
+              newState,
+              // selection
+              new SelectionState({
+                anchorKey: selection.getAnchorKey(),
+                anchorOffset: selection.getAnchorOffset(),
+                focusKey: selection.getFocusKey(),
+                focusOffset: selection.getFocusOffset(),
+                isBackward: selection.isBackward,
+              })
+            );
+          });
+        }}>
+        Click me
+      </button>
       <BlockStyleControls
         editorState={editorState}
         onToggle={toggleBlockType}
