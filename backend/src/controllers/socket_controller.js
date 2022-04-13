@@ -8,6 +8,7 @@ const config = (io) => {
     });
 
     socket.on('editEvent', (event) => {
+      console.log(event);
       socket.to('testRoom').emit('newEvent', event);
     });
 
