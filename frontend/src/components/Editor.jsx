@@ -17,7 +17,6 @@ import {
   ContentBlock,
   getDefaultKeyBinding,
   SelectionState,
-  Modifier,
 } from 'draft-js';
 
 const DraftJSRichTextEditor = () => {
@@ -41,6 +40,7 @@ const DraftJSRichTextEditor = () => {
           const blockNum = content.idToRowNum(blockId);
           const blocks = editorState.getCurrentContent().getBlocksAsArray();
           const selection = editorState.getSelection();
+          let newBlockKey;
           let newSelection = {
             anchorKey: selection.getAnchorKey(),
             anchorOffset: selection.getAnchorOffset(),
@@ -77,8 +77,12 @@ const DraftJSRichTextEditor = () => {
             newRaws.blocks[blockNum].type = targetBlock.style;
             newContent = convertFromRaw(newRaws);
           } else if (event && event.type === 'createBlock') {
-            const block = content.createBlock({ ...event, fromOutside: true });
-            let newBlocks = createNewBlock(blocks, block);
+            const newBlock = content.createBlock({
+              ...event,
+              fromOutside: true,
+            });
+            let newBlocks = createNewBlock(blocks, newBlock);
+            newBlockKey = newBlocks[newBlock + 1].key;
             newContent = ContentState.createFromBlockArray(newBlocks);
           } else if (event && event.type === 'removeBlock') {
             const targetBlock = event.target;
@@ -96,7 +100,7 @@ const DraftJSRichTextEditor = () => {
             .getBlockMap()
             .keySeq()
             .findIndex((k) => k === newSelection.anchorKey);
-          if (blockNum === currentBlockIndex) {
+          if (blockNum === currentBlockIndex && !event.stopHandleCursor) {
             if (event.type === 'removeBlock') {
               newSelection.anchorKey = newRaws.blocks[blockNum - 1].key;
               newSelection.focusKey = newRaws.blocks[blockNum - 1].key;
@@ -105,8 +109,17 @@ const DraftJSRichTextEditor = () => {
               newSelection.focusOffset +=
                 newRaws.blocks[blockNum - 1].text.length;
             } else if (
+              event.cursor <= newSelection.anchorOffset &&
+              event.type === 'createBlock'
+            ) {
+              newSelection.anchorKey = newBlockKey;
+              newSelection.focusKey = newBlockKey;
+              newSelection.anchorOffset = 0;
+              newSelection.focusOffset = 0;
+            } else if (
               event.cursor < newSelection.anchorOffset ||
-              (event.cursor === newSelection.anchorOffset && event.rowDiff <= 0)
+              (event.cursor === newSelection.anchorOffset &&
+                (event.rowDiff <= 0 || event.type === 'insertMultiple'))
             ) {
               newSelection.anchorOffset += event.rowDiff;
               newSelection.focusOffset += event.rowDiff;
@@ -115,7 +128,6 @@ const DraftJSRichTextEditor = () => {
               newSelection.focusOffset -= deleteNum;
             }
           }
-
           return EditorState.forceSelection(
             EditorState.createWithContent(newContent),
             new SelectionState(newSelection)
@@ -245,12 +257,15 @@ const DraftJSRichTextEditor = () => {
       newRaws.blocks[blockIndex].text = targetBlock.getContent();
       const editor = EditorState.createWithContent(convertFromRaw(newRaws));
       if (handled) {
-        socket.emit('editEvent', socketEvent);
+        socket.emit('editEvent', {
+          ...socketEvent,
+          stopHandleCursor: !requiredChange,
+        });
       }
       return EditorState.forceSelection(
         handled ? editor : editorState,
         selection ||
-          (!requiredChange
+          (!requiredChange || !handled
             ? editorState.getSelection()
             : editorState
                 .getSelection()
@@ -266,14 +281,7 @@ const DraftJSRichTextEditor = () => {
     });
   };
 
-  const handleKeyCommand = (command, editorState) => {
-    const newState = RichUtils.handleKeyCommand(editorState, command);
-    if (newState) {
-      onChange(newState);
-      return 'handled';
-    }
-    return 'not-handled';
-  };
+  const handleKeyCommand = (command, editorState) => {};
 
   const onTab = (e) => {
     const maxDepth = 4;
@@ -299,7 +307,6 @@ const DraftJSRichTextEditor = () => {
   };
 
   const keyBindingFn = (e) => {
-    // console.log(e);
     // TODO: Maybe I can control event by myself here
     // Multi block operation
     let raws = convertToRaw(editorState.getCurrentContent());
@@ -352,6 +359,7 @@ const DraftJSRichTextEditor = () => {
         newText,
         raws.blocks[startBlockIndex - 1].text.length,
         startBlockIndex - 1,
+        false,
         false
       );
       return 'handled';
@@ -401,21 +409,22 @@ const DraftJSRichTextEditor = () => {
       getSelectionState(editorState);
     let raws = convertToRaw(editorState.getCurrentContent());
     const blocks = text.split('\n');
+    let firstBlockText = raws.blocks[startBlockIndex].text.slice(0, startIndex);
+    let lastBlockText = raws.blocks[endBlockIndex].text.slice(startIndex);
+    handleSingleBlockEditing(
+      firstBlockText,
+      firstBlockText.length,
+      startBlockIndex,
+      false,
+      false
+    );
+    let blockIndex = startBlockIndex;
     for (let i = 0; i < blocks.length; i++) {
-      // First
-      let blockIndex = startBlockIndex + i;
+      blockIndex = startBlockIndex + i;
       if (i === 0) {
         handleSingleBlockEditing(
-          raws.blocks[startBlockIndex].text.slice(0, startIndex) + blocks[i],
+          firstBlockText + blocks[i],
           startIndex,
-          blockIndex
-        );
-      } else if (i === blocks.length - 1) {
-        // Create block
-        createBlock(blockIndex - 1, blocks[i].length);
-        handleSingleBlockEditing(
-          blocks[i] + raws.blocks[startBlockIndex].text.slice(startIndex),
-          0,
           blockIndex
         );
       } else {
@@ -424,6 +433,23 @@ const DraftJSRichTextEditor = () => {
         // Handle the block text
         handleSingleBlockEditing(blocks[i], 0, blockIndex);
       }
+    }
+    if (blocks.length === 1) {
+      handleSingleBlockEditing(
+        firstBlockText + blocks[0] + lastBlockText,
+        (firstBlockText + blocks[0]).length,
+        blockIndex,
+        false,
+        false
+      );
+    } else {
+      handleSingleBlockEditing(
+        blocks[blocks.length - 1] + lastBlockText,
+        (blocks[blocks.length - 1] + lastBlockText).length,
+        blockIndex,
+        false,
+        false
+      );
     }
     return true;
   };
@@ -496,6 +522,8 @@ const DraftJSRichTextEditor = () => {
     <div className="RichEditor-root">
       <button
         onClick={() => {
+          console.log(convertToRaw(editorState.getCurrentContent()));
+          console.log(editorState.getSelection());
           // setEditorState((prevEditorState) => {
           //   let newContent = Modifier.replaceText(
           //     editorState.getCurrentContent(),

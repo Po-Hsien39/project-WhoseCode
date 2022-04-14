@@ -156,6 +156,8 @@ class Block {
   }
 
   static getChainFamily(parentNode, id, status) {
+    console.log(parentNode);
+    console.log(id);
     let index = 0;
     while (index !== id) {
       parentNode = parentNode.next;
