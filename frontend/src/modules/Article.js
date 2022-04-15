@@ -100,7 +100,7 @@ class Article {
     return structure;
   }
   static getNextBlock(block) {
-    let current = block.next.next;
+    let current = block.next;
     while (current.uId) {
       if (!current.isDeleted) return current;
       current = current.next;
@@ -111,7 +111,11 @@ class Article {
     let rowNum = 0;
     let current = this.blocks.next;
     while (current !== null) {
-      if (current.uId === uId) return rowNum;
+      if (current.uId === uId) {
+        if (!current.isDeleted) return rowNum;
+        // TODO: this part should check previous code
+        else return -1;
+      }
       if (!current.isDeleted) rowNum++;
       current = current.next;
     }

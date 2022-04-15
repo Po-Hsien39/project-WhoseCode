@@ -81,7 +81,7 @@ class Block {
     }
   }
 
-  deleteMultiple({ target, currentCursor }) {
+  deleteMultiple({ target, currentCursor = 0 }) {
     let currentKey = this.texts;
     let textLen = 0;
     let removeCnt = 0;
