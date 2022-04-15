@@ -147,7 +147,9 @@ const DraftJSRichTextEditor = () => {
               }
               if (i === blockDetails.length - 1) {
                 newBlockKey = blocks[blockNum + i].key;
-                finalText = blockDetails[i].insertTarget.length;
+                finalText = blockDetails[i].insertTarget
+                  ? blockDetails[i].insertTarget.length
+                  : 0;
                 insertContent = {
                   prev: event.insertPrev,
                   next: event.insertNext,
@@ -167,11 +169,10 @@ const DraftJSRichTextEditor = () => {
           } else if (event && event.type === 'removeBlock') {
             // First delete modify previous block
             const target = event.target;
-            const blockIndex = content.idToRowNum(target);
-            content.removeBlock(target);
-            blocks.splice(blockIndex, 1);
+            content.removeBlock(blockId);
+            blocks.splice(blockNum, 1);
             // Then Modified previous block
-            const targetBlock = content.getBlockFromId(event.insertBlock);
+            const targetBlock = content.getBlockFromId(event.target);
             let insertContent = {
               prev: event.insertPrev,
               next: event.insertNext,
@@ -182,7 +183,6 @@ const DraftJSRichTextEditor = () => {
               targetBlock.insertKey(insertContent);
             else if (event.insertType === 'insertMultiple')
               targetBlock.insertMultiple(insertContent);
-
             newContent = ContentState.createFromBlockArray(blocks);
             let modifiedRaws = convertToRaw(newContent);
             // TODO: Bugs: what if the block is deleted?
@@ -248,7 +248,7 @@ const DraftJSRichTextEditor = () => {
                 newRaws.blocks[blockNum - 1].text.length;
             } else if (
               event.type === 'createBlocks' &&
-              event.cursor <= newSelection.anchorOffset
+              event.cursor < newSelection.anchorOffset
             ) {
               newSelection.anchorKey = newBlockKey;
               newSelection.focusKey = newBlockKey;
@@ -257,7 +257,7 @@ const DraftJSRichTextEditor = () => {
               newSelection.focusOffset =
                 newSelection.anchorOffset - event.cursor + finalText;
             } else if (
-              event.cursor <= newSelection.anchorOffset &&
+              event.cursor < newSelection.anchorOffset &&
               event.type === 'createBlock'
             ) {
               newSelection.anchorKey = newBlockKey;
@@ -565,7 +565,7 @@ const DraftJSRichTextEditor = () => {
         insertTarget: insertKeys.target,
         insertPrev: insertKeys.prev,
         insertNext: insertKeys.next,
-        target: targetBlock,
+        target: content.rowNumToId(startBlockIndex - 1),
         cursor: startIndex,
         block: targetBlock,
         blockDiff: -1,
@@ -740,40 +740,6 @@ const DraftJSRichTextEditor = () => {
       <button
         onClick={() => {
           console.log(editorState.getSelection());
-          // console.log(convertToRaw(editorState.getCurrentContent()));
-          // console.log(editorState.getSelection());
-          // setEditorState((prevEditorState) => {
-          //   let newContent = Modifier.replaceText(
-          //     editorState.getCurrentContent(),
-          //     editorState
-          //       .getSelection()
-          //       .set('anchorOffset', 0)
-          //       .set('focusOffset', 10),
-          //     'this is a test'
-          //   );
-          //   console.log(newContent);
-          //   // let newState = ContentState.createFromBlockArray(newContent);
-          //   let newState = EditorState.push(
-          //     editorState,
-          //     newContent,
-          //     'insert-characters'
-          //   );
-          //   // console.log(newState);
-          //   let selection = prevEditorState.getSelection();
-          //   let blocks = prevEditorState.getCurrentContent().getBlocksAsArray();
-          //   return EditorState.forceSelection(
-          //     newState,
-          //     // selection
-          //     new SelectionState({
-          //       anchorKey: selection.getAnchorKey(),
-          //       anchorOffset: selection.getAnchorOffset(),
-          //       focusKey: selection.getFocusKey(),
-          //       focusOffset: selection.getFocusOffset(),
-          //       isBackward: selection.isBackward,
-          //     })
-          //   );
-          // });
-          // console.log(conver(editorState.getCurrentContent()));
         }}>
         Click me
       </button>
