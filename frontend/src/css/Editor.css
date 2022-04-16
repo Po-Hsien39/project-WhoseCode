@@ -37,7 +37,8 @@
 }
 
 .RichEditor-editor .blockStyle {
-  padding: 10px;
+  padding: 5px;
+  margin: 0;
   cursor: pointer;
   /* font-family: 'Hoefler Text', 'Georgia', serif; */
   font-style: italic;

@@ -1,11 +1,11 @@
 import Text from './Text';
 import uniqid from 'uniqid';
 class Block {
-  constructor(uId = uniqid()) {
+  constructor(uId = uniqid(), style) {
     this.texts = new Text(null, null, 1);
     this.texts.next = new Text(null, null, 2);
     this.texts.next.prev = this.texts;
-    this.style = 'unstyled';
+    this.style = style;
     this.prev = null;
     this.next = null;
     this.isDeleted = false;

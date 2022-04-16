@@ -1,11 +1,18 @@
+/* eslint-disable */
 import { useState, useEffect, useRef, Component } from 'react';
 import '../css/Editor.css';
-import { textDiff } from '../utils';
+import { textDiff, backspaceRemoveType } from '../utils';
 import Text from '../modules/Text';
 import Block from '../modules/Block';
 import Article from '../modules/Article';
 import { useStatus } from '../hook/useStatus';
 import { List } from 'immutable';
+import { PrismDraftDecorator } from '../modules/code-highlight';
+
+import 'prismjs/themes/prism-coy.css';
+import Prism from 'prismjs';
+import { BLOCK_TYPES, styleMap, INLINE_STYLES } from '../constants/constant';
+// import Prism from 'prismjs';
 import {
   Editor,
   EditorState,
@@ -17,11 +24,13 @@ import {
   ContentBlock,
   getDefaultKeyBinding,
   SelectionState,
-  Modifier,
 } from 'draft-js';
+const decorations = new PrismDraftDecorator(Prism.languages.javascript);
 
 const DraftJSRichTextEditor = () => {
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [editorState, setEditorState] = useState(
+    EditorState.createEmpty(decorations)
+  );
   const [content, setContent] = useState(null);
   const { socket } = useStatus();
   const editorRef = useRef(null);
@@ -93,6 +102,7 @@ const DraftJSRichTextEditor = () => {
             const newBlockIndex = content.createBlock({
               ...event,
               fromOutside: true,
+              style: event.blockStyle,
             });
             const newBlock = content.getBlockFromId(event.target.uId);
             let insertContent = {
@@ -106,7 +116,11 @@ const DraftJSRichTextEditor = () => {
             else if (event.insertType === 'insertMultiple')
               newBlock.insertMultiple(insertContent);
             // newRaws.blocks[blockNum].text = targetBlock.getContent();
-            let newBlocks = createNewBlock(blocks, newBlockIndex);
+            let newBlocks = createNewBlock(
+              blocks,
+              newBlockIndex,
+              event.blockStyle
+            );
             newBlockKey = newBlocks[blockNum + 1].key;
             newContent = ContentState.createFromBlockArray(newBlocks);
             let insertedRaw = convertToRaw(newContent);
@@ -279,17 +293,17 @@ const DraftJSRichTextEditor = () => {
             }
           }
           return EditorState.forceSelection(
-            EditorState.createWithContent(newContent),
+            EditorState.createWithContent(newContent, decorations),
             new SelectionState(newSelection)
           );
         });
       });
     }
   }, [socket]);
-  const createNewBlock = (blocks, block) => {
+  const createNewBlock = (blocks, block, type = 'unstyled') => {
     let newBlock = new ContentBlock({
       key: genKey(),
-      type: 'unstyled',
+      type,
       text: '',
       depth: 0,
       characterList: List(),
@@ -306,11 +320,6 @@ const DraftJSRichTextEditor = () => {
       .getBlockMap()
       .keySeq()
       .findIndex((k) => k === startBlockKey);
-    const endBlockIndex = editorState
-      .getCurrentContent()
-      .getBlockMap()
-      .keySeq()
-      .findIndex((k) => k === endBlockKey);
     let newRaws = convertToRaw(editorState.getCurrentContent());
     const blocksNum = newRaws.blocks.length;
     let selectionState = editorState.getSelection();
@@ -338,9 +347,11 @@ const DraftJSRichTextEditor = () => {
         newRaws.blocks[startBlockIndex].text,
         startIndex,
         startBlockIndex,
-        selectionState
+        selectionState,
+        true
       );
     }
+    // setEditorState(editorState);
   };
 
   const handleSingleBlockEditing = (
@@ -405,7 +416,10 @@ const DraftJSRichTextEditor = () => {
     setEditorState((editorState) => {
       let newRaws = convertToRaw(editorState.getCurrentContent());
       newRaws.blocks[blockIndex].text = targetBlock.getContent();
-      const editor = EditorState.createWithContent(convertFromRaw(newRaws));
+      const editor = EditorState.createWithContent(
+        convertFromRaw(newRaws),
+        decorations
+      );
       // Selection means only default operation needs to be send
       if (handled && selection) {
         socket.emit('editEvent', {
@@ -504,6 +518,7 @@ const DraftJSRichTextEditor = () => {
         if (e.key === 'Backspace') return 'handled';
       }
     }
+    const style = raws.blocks[startBlockIndex].type;
 
     if (e.key === 'Enter') {
       const newText = raws.blocks[startBlockIndex].text.slice(0, startIndex);
@@ -514,7 +529,7 @@ const DraftJSRichTextEditor = () => {
         startIndex,
         startBlockIndex
       );
-      let newId = createBlock(startBlockIndex, startIndex);
+      let newId = createBlock(startBlockIndex, style);
       let insertKeys = handleSingleBlockEditing(
         newText2,
         0,
@@ -535,6 +550,7 @@ const DraftJSRichTextEditor = () => {
         insertNext: insertKeys.next,
         deleteType: deleteKeys.type,
         deleteKeys: deleteKeys.target,
+        blockStyle: style,
         next: Article.getNextBlock(
           content.getBlock(startBlockIndex + 1)
         ).toString(),
@@ -542,11 +558,14 @@ const DraftJSRichTextEditor = () => {
       return 'handled';
     } else if (
       e.key === 'Backspace' &&
-      startIndex === 0 && // if cursor is at the start of the block
       startBlockIndex !== 0 && // if cursor is not at the start of the first block
-      raws.blocks[startBlockIndex].type === 'unstyled' && // This is not remove style
+      startIndex === 0 && // if cursor is at the start of the block
+      // raws.blocks[startBlockIndex].type === 'unstyled' && // This is not remove style
       endIndex === 0
     ) {
+      // if (backspaceRemoveType(style)) {
+      //   changeStyle(startBlockIndex, 'unstyled');
+      // } else {
       const newText =
         raws.blocks[startBlockIndex - 1].text +
         raws.blocks[startBlockIndex].text.slice(endIndex);
@@ -570,10 +589,37 @@ const DraftJSRichTextEditor = () => {
         block: targetBlock,
         blockDiff: -1,
       });
+      // }
       return 'handled';
     }
     return getDefaultKeyBinding(e);
   };
+  const changeStyle = (blockIndex, style) => {
+    let targetBlock = content.getBlock(blockIndex);
+    targetBlock.style = style;
+    setEditorState((editorState) => {
+      let newContent = convertToRaw(editorState.getCurrentContent());
+      newContent.blocks[blockIndex].type = style;
+      return EditorState.createWithContent(convertFromRaw(newContent));
+    });
+  };
+  // const changeStyle = (blockIndex, style) => {
+  //   console.log('change');
+  //   let targetBlock = content.getBlock(blockIndex);
+  //   targetBlock.style = style;
+  //   setEditorState((editorState) => {
+  //     return EditorState.push(
+  //       editorState,
+  //       ContentState.createFromText(targetBlock.text),
+  //       'change-block-type'
+  //     );
+  //   });
+  // };
+  // let newContent = convertToRaw(
+  //   editorState.getCurrentContent().getBlocksAsArray()
+  // );
+  // newContent[blockIndex].type = style;
+  // console.log(newContent);
 
   const getSelectionState = (editorState) => {
     let startBlockIndex = editorState
@@ -641,7 +687,7 @@ const DraftJSRichTextEditor = () => {
         );
       } else {
         // Create block
-        blockId = createBlock(blockIndex - 1, blocks[i].length);
+        blockId = createBlock(blockIndex - 1);
         // Handle the block text
         insertText = handleSingleBlockEditing(blocks[i], 0, blockIndex);
       }
@@ -688,17 +734,15 @@ const DraftJSRichTextEditor = () => {
     return true;
   };
 
-  const createBlock = (startBlockIndex, startIndex) => {
-    let newId = content.createBlock({ startBlockIndex });
+  const createBlock = (startBlockIndex, style = 'unstyled') => {
+    let newId = content.createBlock({ startBlockIndex, style });
     setEditorState((editorState) => {
       let blocks = editorState.getCurrentContent().getBlocksAsArray();
-      let newBlocks = createNewBlock(blocks, startBlockIndex);
+      let newBlocks = createNewBlock(blocks, startBlockIndex, style);
       let currentId = newBlocks[startBlockIndex + 1].key;
       let newContent = ContentState.createFromBlockArray(newBlocks);
       return EditorState.forceSelection(
-        // editorState.getCurrentContent(),
-        EditorState.createWithContent(newContent),
-        // editorState.getSelection()
+        EditorState.createWithContent(newContent, decorations),
         editorState
           .getSelection()
           .set('anchorKey', currentId)
@@ -719,7 +763,7 @@ const DraftJSRichTextEditor = () => {
       let prevBlock = blocks[startBlockIndex - 1];
       let newContent = ContentState.createFromBlockArray(blocks);
       return EditorState.forceSelection(
-        EditorState.createWithContent(newContent),
+        EditorState.createWithContent(newContent, decorations),
         editorState
           .getSelection()
           .set('anchorKey', prevBlock.key)
@@ -770,15 +814,6 @@ const DraftJSRichTextEditor = () => {
   );
 };
 
-const styleMap = {
-  CODE: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    fontFamily: '"Inconsolata", "Menlo", "Consolas", monospace',
-    fontSize: 16,
-    padding: 2,
-  },
-};
-
 function getBlockStyle(block) {
   switch (block.getType()) {
     case 'blockquote':
@@ -811,19 +846,6 @@ class StyleButton extends Component {
   }
 }
 
-const BLOCK_TYPES = [
-  { label: 'H1', style: 'header-one' },
-  { label: 'H2', style: 'header-two' },
-  { label: 'H3', style: 'header-three' },
-  { label: 'H4', style: 'header-four' },
-  { label: 'H5', style: 'header-five' },
-  { label: 'H6', style: 'header-six' },
-  { label: 'Blockquote', style: 'blockquote' },
-  { label: 'UL', style: 'unordered-list-item' },
-  { label: 'OL', style: 'ordered-list-item' },
-  { label: 'Code Block', style: 'code-block' },
-];
-
 const BlockStyleControls = (props) => {
   const { editorState } = props;
   const selection = editorState.getSelection();
@@ -846,13 +868,6 @@ const BlockStyleControls = (props) => {
     </div>
   );
 };
-
-const INLINE_STYLES = [
-  { label: 'Bold', style: 'BOLD' },
-  { label: 'Italic', style: 'ITALIC' },
-  { label: 'Underline', style: 'UNDERLINE' },
-  { label: 'Monospace', style: 'CODE' },
-];
 
 const InlineStyleControls = (props) => {
   var currentStyle = props.editorState.getCurrentInlineStyle();

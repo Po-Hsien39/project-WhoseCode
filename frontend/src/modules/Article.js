@@ -34,7 +34,14 @@ class Article {
     }
     return null;
   }
-  createBlock({ prev, target, next, startBlockIndex, fromOutside }) {
+  createBlock({
+    prev,
+    target,
+    next,
+    startBlockIndex,
+    fromOutside,
+    style = 'unstyled',
+  }) {
     let currentKey = this.blocks;
     let index = 0;
     if (fromOutside) {
@@ -48,7 +55,7 @@ class Article {
               currentKey = currentKey.next;
               if (!currentKey.isDeleted && currentKey.uId) index++;
             } else {
-              let newKey = fromOutside ? new Block(target.uId) : target;
+              let newKey = fromOutside ? new Block(target.uId, style) : target;
               newKey.next = currentKey.next;
               currentKey.next.prev = newKey;
               currentKey.next = newKey;
@@ -68,7 +75,7 @@ class Article {
         if (!currentKey.isDeleted) startBlockIndex--;
       }
       let uId = uniqid();
-      let newKey = new Block(uId);
+      let newKey = new Block(uId, style);
       newKey.next = currentKey.next;
       currentKey.next.prev = newKey;
       currentKey.next = newKey;
