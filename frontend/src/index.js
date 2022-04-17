@@ -7,14 +7,11 @@ import { StatusProvider } from './hook/useStatus';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-console.log(root);
+
 root.render(
-  // <React.StrictMode>
-  // <div>123</div>
   <StatusProvider>
     <App />
   </StatusProvider>
-  // </React.StrictMode>
 );
 
 reportWebVitals();

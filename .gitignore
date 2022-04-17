@@ -8,7 +8,7 @@ lerna-debug.log*
 
 # React build Folder
 build
-
+scripts
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 

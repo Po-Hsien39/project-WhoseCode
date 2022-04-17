@@ -1,18 +1,17 @@
 /* eslint-disable */
 import { useState, useEffect, useRef, Component } from 'react';
-import '../css/Editor.css';
-import { textDiff, backspaceRemoveType } from '../utils';
-import Text from '../modules/Text';
-import Block from '../modules/Block';
-import Article from '../modules/Article';
-import { useStatus } from '../hook/useStatus';
+import { textDiff } from '../../utils';
+import Text from '../../modules/Text';
+import Block from '../../modules/Block';
+import Article from '../../modules/Article';
+import { useStatus } from '../../hook/useStatus';
 import { List } from 'immutable';
-import { PrismDraftDecorator } from '../modules/code-highlight';
-
-import 'prismjs/themes/prism-coy.css';
+import { PrismDraftDecorator } from '../../modules/code-highlight';
 import Prism from 'prismjs';
-import { BLOCK_TYPES, styleMap, INLINE_STYLES } from '../constants/constant';
-// import Prism from 'prismjs';
+import { BLOCK_TYPES, styleMap, INLINE_STYLES } from '../../constants/constant';
+import { myBlockRenderer, extendedBlockRenderMap } from './configs/blockRender';
+import 'prismjs/themes/prism-coy.css';
+import '../../css/Editor.css';
 import {
   Editor,
   EditorState,
@@ -351,7 +350,6 @@ const DraftJSRichTextEditor = () => {
         true
       );
     }
-    // setEditorState(editorState);
   };
 
   const handleSingleBlockEditing = (
@@ -805,6 +803,8 @@ const DraftJSRichTextEditor = () => {
           onTab={onTab}
           keyBindingFn={keyBindingFn}
           handlePastedText={handlePastedText}
+          blockRenderMap={extendedBlockRenderMap}
+          blockRendererFn={myBlockRenderer}
           // placeholder="Tell a story..."
           ref={editorRef}
           spellCheck={true}
@@ -818,6 +818,8 @@ function getBlockStyle(block) {
   switch (block.getType()) {
     case 'blockquote':
       return 'RichEditor-blockquote';
+    case 'code-block':
+      return {};
     default:
       return 'blockStyle';
   }

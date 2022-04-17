@@ -49,9 +49,6 @@ class PrismDraftDecorator {
 
   getComponentForKey(key) {
     return function (props) {
-      // console.log(props);
-      // props = { toktype: props.tokType, ...props };
-      console.log(props);
       return <span className={'token ' + props.tokType}>{props.children}</span>;
     };
   }

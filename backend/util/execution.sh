@@ -1,0 +1,1 @@
+docker run --rm -v $(pwd)/scripts/$1:/execute.js node:16-alpine node /execute.js

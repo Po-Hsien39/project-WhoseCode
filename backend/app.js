@@ -3,6 +3,10 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
+const morganBody = require('morgan-body');
+const cors = require('cors');
+require('dotenv-defaults').config();
+const { PORT, API_VERSION } = process.env;
 const io = new Server(server, {
   cors: {
     origin: '*',
@@ -11,14 +15,23 @@ const io = new Server(server, {
 
 require('./src/controllers/socket_controller').config(io);
 
-// app.get('/', (req, res) => {
-//   res.sendFile(__dirname + '/index.html');
-// });
+app.set('trust proxy', true);
+app.set('json spaces', 2);
 
-// io.on('connection', (socket) => {
-//   console.log('a user connected');
-// });
+app.use(express.static('public'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-server.listen(3000, () => {
-  console.log('listening on *:3000');
+morganBody(app);
+
+// CORS allow all
+app.use(cors());
+
+// API routes
+app.use(
+  '/api/' + API_VERSION,
+  /* rateLimiterRoute,*/ [require('./server/routes/code_route')]
+);
+server.listen(PORT, () => {
+  console.log('listening on *:' + PORT);
 });

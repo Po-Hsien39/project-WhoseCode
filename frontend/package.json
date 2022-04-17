@@ -1,11 +1,16 @@
 {
   "name": "frontend",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.7.0",
+    "@emotion/styled": "^11.6.0",
+    "@mui/icons-material": "^5.2.1",
+    "@mui/material": "^5.2.3",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^0.26.1",
     "draft-js": "^0.11.7",
     "draft-js-prism": "^1.0.6",
     "immutable": "3.8.0",
