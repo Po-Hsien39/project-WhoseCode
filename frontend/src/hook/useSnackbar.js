@@ -13,7 +13,6 @@ const SnackbarProvider = ({ children }) => {
   });
 
   const showMessage = (message, severity = 'success', duration = 2000) => {
-    console.log(message);
     setSnackbarOption({
       open: true,
       message,

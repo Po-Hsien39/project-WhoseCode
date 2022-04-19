@@ -1,3 +1,5 @@
+const { Note } = require('../../util/schema');
+
 const config = (io) => {
   io.on('connection', async (socket) => {
     console.log('a user connected');
@@ -10,6 +12,15 @@ const config = (io) => {
     socket.on('editEvent', (event) => {
       console.log(event);
       socket.to('testRoom').emit('newEvent', event);
+    });
+
+    socket.on('saveNotes', async (event) => {
+      console.log(event);
+      await Note.findOneAndUpdate(
+        { user: 'Tristan' },
+        { note: event.content },
+        { upsert: true }
+      );
     });
 
     socket.on('disconnect', () => {

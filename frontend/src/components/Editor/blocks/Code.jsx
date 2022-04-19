@@ -91,6 +91,7 @@ const CodeWrapper = (props) => {
       <Fade in={showFunc}>
         <Grid
           container
+          wrap="nowrap"
           sx={{
             position: 'absolute',
             top: 0,
@@ -100,8 +101,8 @@ const CodeWrapper = (props) => {
             transform: 'translateY(3px)',
             transition: 'all 10s ease',
           }}>
-          <Grid item xs={12} md={0.25}></Grid>
-          <Grid item xs={12} md={2}>
+          {/* <Grid item xs={12} md={0.5}></Grid> */}
+          <Grid item xs={12} md={2} sx={{ marginLeft: '20px' }}>
             <select
               id="language-selection"
               onChange={(e) => setCodeLanguage(e.target.value)}>
@@ -111,7 +112,7 @@ const CodeWrapper = (props) => {
               <option value="c++">C++</option>
             </select>
           </Grid>
-          <Grid item xs={12} md={8}></Grid>
+          <Grid item xs={12} md={8.5}></Grid>
           <Grid item xs={12} md={1.5}>
             <Box
               contentEditable={false}

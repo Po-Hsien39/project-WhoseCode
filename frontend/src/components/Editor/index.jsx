@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { useState, useEffect, useRef, Component } from 'react';
+import { useState, useEffect, useRef, Component, useCallback } from 'react';
 import { textDiff } from '../../utils';
 import Text from '../../modules/Text';
 import Block from '../../modules/Block';
@@ -12,6 +12,7 @@ import { BLOCK_TYPES, styleMap, INLINE_STYLES } from '../../constants/constant';
 import { myBlockRenderer, extendedBlockRenderMap } from './configs/blockRender';
 import 'prismjs/themes/prism-coy.css';
 import '../../css/Editor.css';
+import _ from 'lodash';
 import {
   Editor,
   EditorState,
@@ -38,6 +39,18 @@ const DraftJSRichTextEditor = () => {
     setContent(new Article());
   }, []);
 
+  useEffect(() => {
+    if (socket) {
+      debounceLoadData(socket, editorState.getCurrentContent());
+    }
+  }, [socket, editorState]);
+  // Auto Saving
+  const saveContent = (socket, content) => {
+    socket.emit('saveNotes', {
+      content: convertToRaw(content),
+    });
+  };
+  const debounceLoadData = useCallback(_.debounce(saveContent, 10000), []);
   useEffect(() => {
     if (socket) {
       socket.emit('joinRoom');
@@ -779,12 +792,6 @@ const DraftJSRichTextEditor = () => {
 
   return (
     <div className="RichEditor-root">
-      <button
-        onClick={() => {
-          console.log(editorState.getSelection());
-        }}>
-        Click me
-      </button>
       <BlockStyleControls
         editorState={editorState}
         onToggle={toggleBlockType}
