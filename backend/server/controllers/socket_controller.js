@@ -11,19 +11,24 @@ const config = (io) => {
 
     socket.on('editEvent', (event) => {
       console.log(event);
+      console.log(io.sockets.adapter.rooms);
       socket.to('testRoom').emit('newEvent', event);
     });
 
     socket.on('saveNotes', async (event) => {
+      const { noteId, content } = event;
       console.log(event);
       await Note.findOneAndUpdate(
-        { user: 'Tristan' },
-        { note: event.content },
+        { noteId },
+        { note: content },
         { upsert: true }
       );
     });
 
     socket.on('disconnect', () => {
+      console.log(socket.id, 'disconnected');
+      console.log(io.sockets.adapter.rooms);
+
       console.log('user disconnected');
     });
     socket.on('join', async (data) => {

@@ -4,13 +4,12 @@ const validator = require('validator');
 const getUserProfile = async (req, res, next) => {
   try {
     const user = req.user;
-    console.log(user);
     res.json({
       data: {
         provider: user.provider,
         name: user.name,
         email: user.email,
-        picture: user.picture,
+        id: user.id,
       },
     });
   } catch (err) {
@@ -21,7 +20,6 @@ const getUserProfile = async (req, res, next) => {
 const userSignUp = async (req, res) => {
   let { name } = req.body;
   const { email, password } = req.body;
-  console.log(name, email, password);
   if (!name || !email || !password) {
     res.status(400).send({
       error: 'Request Error: name, email, password and role are required.',
@@ -106,7 +104,6 @@ const userSignIn = async (req, res) => {
 };
 
 const nativeSignIn = async (email, password) => {
-  console.log('?');
   if (!email || !password) {
     return {
       error: 'Request Error: email and password are required.',

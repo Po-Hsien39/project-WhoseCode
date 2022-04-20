@@ -24,9 +24,15 @@ const CodeWrapper = (props) => {
   const { showMessage } = useSnackbar();
 
   const getCode = async (e) => {
+    const svg = e.target.parentElement.querySelector('svg');
+    // .parentElement.parentElement.parentElement
+    //   .parentElement;
+    console.log(svg);
     const codeBlock =
-      e.target.parentElement.parentElement.parentElement.parentElement
-        .parentElement.parentElement;
+      svg.parentElement.parentElement.parentElement.parentElement.parentElement;
+
+    console.log(codeBlock);
+    // console.log(codeBlock.parentElement);
     const codes = codeBlock.querySelectorAll('section.code');
     let codeText = '';
     codes.forEach((code) => {

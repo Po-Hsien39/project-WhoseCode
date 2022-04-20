@@ -4,22 +4,15 @@ const { TOKEN_SECRET } = process.env;
 const authentication = () => {
   return async function (req, res, next) {
     let accessToken = req.get('Authorization');
-    if (!accessToken) {
-      res.status(401).send({ error: 'Unauthorizedtest' });
-      return;
-    }
+    if (!accessToken) return res.status(401).send({ error: 'Unauthorized' });
 
     accessToken = accessToken.replace('Bearer ', '');
-    if (accessToken == 'null') {
-      res.status(401).send({ error: 'Unauthorized' });
-      return;
-    }
+    if (!accessToken) return res.status(401).send({ error: 'Unauthorized' });
 
     try {
       const user = await jwt.asyncVerify(accessToken, TOKEN_SECRET);
+      if (!user) return res.status(403).send({ error: 'Forbidden' });
       req.user = user;
-
-      if (!user) res.status(403).send({ error: 'Forbidden' });
       next();
       return;
     } catch (err) {

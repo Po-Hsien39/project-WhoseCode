@@ -12,7 +12,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [signup, setSignup] = useState(false);
   const [wrongPassword, setWrongPassword] = useState(false);
-  const { user, setUser } = useStatus();
+  const { user, setUser, request } = useStatus();
   const [values, setValues] = useState({
     name: undefined,
     email: undefined,
@@ -22,7 +22,6 @@ const Login = () => {
   });
 
   const { showMessage } = useSnackbar();
-  // const { setUserProfile, userProfile } = useStatus();
   useEffect(() => {
     const input = document.querySelectorAll('input');
     input.forEach((i) =>
@@ -49,18 +48,15 @@ const Login = () => {
     } else {
       setWrongPassword(false);
       try {
-        let res = await axios.post(
-          process.env.REACT_APP_DOMAIN + '/api/1.0/user/signup',
-          {
-            name: values.name,
-            email: values.email,
-            password: values.password,
-            provider: 'native',
-          }
+        let res = await request.signUp(
+          values.name,
+          values.email,
+          values.password
         );
         // Save Local Storage
         window.localStorage.setItem('token', res.data.data.access_token);
         setUser({
+          id: res.data.data.user.id,
           name: values.name,
           email: values.email,
           login: true,
@@ -77,19 +73,12 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let res = await axios.post(
-        process.env.REACT_APP_DOMAIN + '/api/1.0/user/signin',
-        {
-          email: values.email,
-          password: values.password,
-          provider: 'native',
-        }
-      );
-      console.log(res.data.data);
+      let res = await request.nativeSignIn(values.email, values.password);
       const { user, access_token } = res.data.data;
       // Save Local Storage
       window.localStorage.setItem('token', access_token);
       setUser({
+        id: user.id,
         name: user.name,
         email: user.email,
         login: true,

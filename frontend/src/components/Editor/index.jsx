@@ -1,5 +1,12 @@
 /* eslint-disable */
-import { useState, useEffect, useRef, Component, useCallback } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  Component,
+  useCallback,
+  Fragment,
+} from 'react';
 import { textDiff } from '../../utils';
 import Text from '../../modules/Text';
 import Block from '../../modules/Block';
@@ -10,6 +17,7 @@ import { PrismDraftDecorator } from '../../modules/code-highlight';
 import Prism from 'prismjs';
 import { BLOCK_TYPES, styleMap, INLINE_STYLES } from '../../constants/constant';
 import { myBlockRenderer, extendedBlockRenderMap } from './configs/blockRender';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import 'prismjs/themes/prism-coy.css';
 import '../../css/Editor.css';
 import _ from 'lodash';
@@ -27,30 +35,56 @@ import {
 } from 'draft-js';
 const decorations = new PrismDraftDecorator(Prism.languages.javascript);
 
-const DraftJSRichTextEditor = () => {
-  const [editorState, setEditorState] = useState(
-    EditorState.createEmpty(decorations)
-  );
+const DraftJSRichTextEditor = ({ noteId }) => {
+  const [editorState, setEditorState] = useState(null);
   const [content, setContent] = useState(null);
-  const { socket } = useStatus();
+  const { socket, note, request } = useStatus();
   const editorRef = useRef(null);
-
   useEffect(() => {
-    setContent(new Article());
-  }, []);
-
+    if (noteId) {
+      setContent(new Article());
+    }
+  }, [noteId]);
   useEffect(() => {
-    if (socket) {
-      debounceLoadData(socket, editorState.getCurrentContent());
+    if (content) {
+      const setPreview = async () => {
+        let res = await request.getNote(note.id);
+        console.log(res);
+        if (!res.data.note) {
+          setEditorState(EditorState.createEmpty(decorations));
+          return;
+        } else {
+          const rawContent = JSON.parse(res.data.note?.note);
+          if (rawContent) {
+            console.log(rawContent);
+            setEditorState(
+              EditorState.createWithContent(
+                convertFromRaw(rawContent),
+                decorations
+              )
+            );
+            content.setInitalContent(rawContent);
+          } else {
+            setEditorState(EditorState.createEmpty(decorations));
+          }
+        }
+      };
+      setPreview();
+    }
+  }, [content]);
+  useEffect(() => {
+    if (socket && editorState && noteId) {
+      debounceLoadData(socket, editorState.getCurrentContent(), noteId);
     }
   }, [socket, editorState]);
   // Auto Saving
-  const saveContent = (socket, content) => {
+  const saveContent = (socket, content, noteId) => {
     socket.emit('saveNotes', {
-      content: convertToRaw(content),
+      content: JSON.stringify(convertToRaw(content)),
+      noteId: noteId,
     });
   };
-  const debounceLoadData = useCallback(_.debounce(saveContent, 10000), []);
+  const debounceLoadData = useCallback(_.debounce(saveContent, 3000), []);
   useEffect(() => {
     if (socket) {
       socket.emit('joinRoom');
@@ -791,33 +825,54 @@ const DraftJSRichTextEditor = () => {
   };
 
   return (
-    <div className="RichEditor-root">
-      <BlockStyleControls
-        editorState={editorState}
-        onToggle={toggleBlockType}
-      />
-      <InlineStyleControls
-        editorState={editorState}
-        onToggle={toggleInlineStyle}
-      />
-      <div className={'RichEditor-editor'} onClick={focus}>
-        <Editor
-          blockStyleFn={getBlockStyle}
-          customStyleMap={styleMap}
-          editorState={editorState}
-          handleKeyCommand={handleKeyCommand}
-          onChange={onChange}
-          onTab={onTab}
-          keyBindingFn={keyBindingFn}
-          handlePastedText={handlePastedText}
-          blockRenderMap={extendedBlockRenderMap}
-          blockRendererFn={myBlockRenderer}
-          // placeholder="Tell a story..."
-          ref={editorRef}
-          spellCheck={true}
-        />
-      </div>
-    </div>
+    <Fragment>
+      {editorState ? (
+        <div className="RichEditor-root">
+          <BlockStyleControls
+            editorState={editorState}
+            onToggle={toggleBlockType}
+          />
+          <InlineStyleControls
+            editorState={editorState}
+            onToggle={toggleInlineStyle}
+          />
+          <div className={'RichEditor-editor'} onClick={focus}>
+            <Editor
+              blockStyleFn={getBlockStyle}
+              customStyleMap={styleMap}
+              editorState={editorState}
+              handleKeyCommand={handleKeyCommand}
+              onChange={onChange}
+              onTab={onTab}
+              keyBindingFn={keyBindingFn}
+              handlePastedText={handlePastedText}
+              blockRenderMap={extendedBlockRenderMap}
+              blockRendererFn={myBlockRenderer}
+              // placeholder="Tell a story..."
+              ref={editorRef}
+              spellCheck={true}
+            />
+          </div>
+        </div>
+      ) : (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            marginTop: '35vh',
+            width: '100%',
+            alignItems: 'center',
+          }}>
+          <CircularProgress color="secondary" />
+          <Typography
+            variant="h7"
+            sx={{ color: 'gray', marginTop: '25px' }}
+            noWrap>
+            Please Wait~ Your Note is on the way
+          </Typography>
+        </Box>
+      )}
+    </Fragment>
   );
 };
 
@@ -825,8 +880,6 @@ function getBlockStyle(block) {
   switch (block.getType()) {
     case 'blockquote':
       return 'RichEditor-blockquote';
-    case 'code-block':
-      return {};
     default:
       return 'blockStyle';
   }

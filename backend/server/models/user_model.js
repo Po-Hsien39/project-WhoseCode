@@ -67,22 +67,22 @@ const signUp = async (name, email, password) => {
       password: hashedPwd,
       name: name,
     };
+
+    const queryStr = 'INSERT INTO user SET ?';
+    const [result] = await conn.query(queryStr, user);
+
     const accessToken = await jwt.asyncSign(
       {
         provider: user.provider,
         name: user.name,
         email: user.email,
-        id: user.id,
+        id: result.insertId,
         access_expired: TOKEN_EXPIRE,
       },
       TOKEN_SECRET
     );
-
-    const queryStr = 'INSERT INTO user SET ?';
-    const [result] = await conn.query(queryStr, user);
-
-    user.access_token = accessToken;
     user.id = result.insertId;
+    user.access_token = accessToken;
     await conn.query('COMMIT');
     return { user };
   } catch (error) {

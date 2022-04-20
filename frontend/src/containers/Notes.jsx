@@ -1,31 +1,32 @@
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { styled, useTheme } from '@mui/material/styles';
-import { Tooltip, Box, Drawer } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
-import MuiAppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import {
+  Tooltip,
+  Toolbar,
+  Box,
+  Drawer,
+  CssBaseline,
+  AppBar as MuiAppBar,
+  List,
+  Typography,
+  Divider,
+  IconButton,
+  ButtonBase,
+  Avatar,
+  Button,
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  AccessAlarm as AccessAlarmIcon,
+  StarBorder as StarBorderIcon,
+  MoreHoriz as MoreHorizIcon,
+  Add as AddIcon,
+} from '@mui/icons-material';
 import Editor from './Editor';
-import { ButtonBase, Avatar, Button } from '@mui/material';
 import { useStatus } from '../hook/useStatus';
-import SettingsIcon from '@mui/icons-material/Settings';
-import SearchIcon from '@mui/icons-material/Search';
-import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
-import ArticleIcon from '@mui/icons-material/Article';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import AddIcon from '@mui/icons-material/Add';
+import MyList from '../components/Notes/List';
 const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -74,9 +75,31 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 export default function PersistentDrawerLeft() {
-  const { user } = useStatus();
+  const { user, request, setNote, notes, setNotes } = useStatus();
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(true);
+  useEffect(() => {
+    console.log('notes', notes);
+  }, [notes]);
+
+  useEffect(() => {
+    if (user.id) {
+      const fetchNotes = async () => {
+        const res = await request.getAllNotes(user.id);
+        setNotes(res.data.notes);
+      };
+      fetchNotes();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    console.log('notes', notes);
+  }, [notes]);
+
+  const createNote = async () => {
+    let note = await request.createNote();
+    setNote({ ...note, id: note.data.noteId });
+  };
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -84,17 +107,6 @@ export default function PersistentDrawerLeft() {
 
   const handleDrawerClose = () => {
     setOpen(false);
-  };
-  const iconPicker = (text) => {
-    if (text === 'Quick Find') {
-      return <SearchIcon />;
-    } else if (text === 'All Updates') {
-      return <AccessAlarmIcon />;
-    } else if (text === 'Setting & Members') {
-      return <SettingsIcon />;
-    } else {
-      return <SettingsIcon />;
-    }
   };
   return (
     <Box sx={{ display: 'flex' }}>
@@ -119,11 +131,6 @@ export default function PersistentDrawerLeft() {
             <Tooltip title="Share With Others" placement="bottom">
               <Button sx={{ color: 'black' }}>Share</Button>
             </Tooltip>
-            {/* <Tooltip title="Create Notes" placement="bottom">
-              <IconButton>
-                <AddIcon />
-              </IconButton>
-            </Tooltip> */}
             <Tooltip title="View Version" placement="bottom">
               <IconButton>
                 <AccessAlarmIcon />
@@ -179,40 +186,8 @@ export default function PersistentDrawerLeft() {
         </DrawerHeader>
         <Divider />
         <List>
-          {['Quick Find', 'All Updates', 'Setting & Members'].map(
-            (text, index) => (
-              <ListItem button key={text}>
-                <ListItemIcon>{iconPicker(text)}</ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            )
-          )}
-        </List>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography
-            variant="h10"
-            fontSize={12}
-            sx={{ marginLeft: '17px', color: 'gray' }}
-            noWrap>
-            FAVORITES
-          </Typography>
-          <IconButton
-            size="small"
-            fontSize="small"
-            sx={{ marginLeft: '100px' }}>
-            <AddIcon />
-          </IconButton>
-        </Box>
-        <List>
-          {['How to be a Engineer?'].map((text, index) => (
-            <ListItem button key={text}>
-              <ArticleIcon
-                fontSize="small"
-                size="small"
-                sx={{ marginRight: '5px' }}
-              />
-              <ListItemText primary={text} sx={{ fontSize: '15px' }} />
-            </ListItem>
+          {['Home', 'Quick Find', 'All Updates', 'Setting'].map((text) => (
+            <MyList title={text} key={text} />
           ))}
         </List>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -226,18 +201,28 @@ export default function PersistentDrawerLeft() {
           <IconButton
             size="small"
             fontSize="small"
-            sx={{ marginLeft: '120px' }}>
+            sx={{ marginLeft: '120px' }}
+            onClick={createNote}>
             <AddIcon />
           </IconButton>
         </Box>
+        {notes.map((note, i) => {
+          return (
+            <MyList title={note.title} type={'note'} id={note.id} key={i} />
+          );
+        })}
+        <Box sx={{ display: 'flex', alignItems: 'center', marginTop: '15px' }}>
+          <Typography
+            variant="h10"
+            fontSize={12}
+            sx={{ marginLeft: '17px', color: 'gray' }}
+            noWrap>
+            OTHERS
+          </Typography>
+        </Box>
         <List>
-          {['Trash'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
+          {['Trash', 'Export'].map((text) => (
+            <MyList title={text} key={text} />
           ))}
         </List>
       </Drawer>

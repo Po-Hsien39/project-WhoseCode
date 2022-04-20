@@ -70,6 +70,18 @@ class Block {
     }
   }
 
+  insertInitialize(texts) {
+    let current = this.texts;
+    for (let i = 0; i < texts.length; i++) {
+      let newKey = new Text('dev', texts[i]);
+      newKey.next = current.next;
+      current.next.prev = newKey;
+      current.next = newKey;
+      newKey.prev = current;
+      current = current.next;
+    }
+  }
+
   deleteKey({ target }) {
     let currentKey = this.texts;
     while (currentKey.next !== null) {

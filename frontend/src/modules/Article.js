@@ -97,6 +97,7 @@ class Article {
     let structure = [];
     let current = this.blocks;
     while (current !== null) {
+      console.log(current);
       structure.push({
         id: current.uId,
         isDeleted: current.isDeleted,
@@ -105,6 +106,25 @@ class Article {
       current = current.next;
     }
     return structure;
+  }
+  setInitalContent(blocks) {
+    console.log(blocks);
+    blocks = blocks.blocks;
+    let current = this.blocks;
+    for (let i = 0; i < blocks.length; i++) {
+      if (i == 0) {
+        current.style = blocks[i].style;
+        current.next.insertInitialize(blocks[i].text);
+      } else {
+        let newBlock = new Block(blocks[i].key, blocks[i].style);
+        newBlock.next = current.next;
+        current.next.prev = newBlock;
+        current.next = newBlock;
+        newBlock.prev = current;
+        newBlock.insertInitialize(blocks[i].text);
+      }
+      current = current.next;
+    }
   }
   static getNextBlock(block) {
     let current = block.next;
