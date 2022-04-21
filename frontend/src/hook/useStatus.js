@@ -10,6 +10,8 @@ const StatusContext = createContext({
   request: {},
   notes: [],
   setNotes: () => {},
+  versionNote: {},
+  setVersionNote: () => {},
 });
 
 const StatusProvider = (props) => {
@@ -19,12 +21,23 @@ const StatusProvider = (props) => {
     email: '',
     login: false,
   });
-  const [notes, setNotes] = useState([]);
+
+  const [notes, setNotes] = useState({ private: [], collect: [], delete: [] });
+  const [versionNote, setVersionNote] = useState({
+    id: '',
+    version: '',
+    content: '',
+  });
   const [note, setNote] = useState({
     id: null,
+    star: false,
   });
   const [request, setRequest] = useState(Request);
   const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    console.log(versionNote);
+  }, [versionNote]);
 
   useEffect(() => {
     const socket = io(process.env.REACT_APP_SOCKET_URL);
@@ -62,6 +75,8 @@ const StatusProvider = (props) => {
         request,
         notes,
         setNotes,
+        versionNote,
+        setVersionNote,
       }}
       {...props}
     />

@@ -14,6 +14,11 @@ const theme = createTheme({
       dark: '#000',
       contrastText: '#ffcc00',
     },
+    tetiary: {
+      main: '#f5e6ed',
+      light: '#e8a7c8',
+      dark: '#f0d8e4',
+    },
     // 使用 `getContrastText()` 来最大化
     // 背景和文本的对比度
     contrastThreshold: 3,

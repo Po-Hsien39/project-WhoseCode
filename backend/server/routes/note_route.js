@@ -13,9 +13,8 @@ const authentication = require('../middleware/authentication');
 router
   .route('/note')
   .post(authentication(), wrapAsync(createNote))
-  .put(wrapAsync(modifyNote))
   .delete(wrapAsync(deleteNote));
 
 router.route('/notes/:id').get(wrapAsync(getAllNotes));
-router.route('/note/:id').get(wrapAsync(getNote));
+router.route('/note/:id').get(wrapAsync(getNote)).put(wrapAsync(modifyNote));
 module.exports = router;

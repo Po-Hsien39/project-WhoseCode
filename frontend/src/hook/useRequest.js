@@ -43,6 +43,26 @@ const useRequest = {
       process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId
     );
   },
+  updateNote: async (noteId, star) => {
+    return await axios.put(
+      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      { star }
+    );
+  },
+  getVersions: async (noteId) => {
+    return await axios.get(
+      process.env.REACT_APP_DOMAIN + '/api/1.0/versions/' + noteId
+    );
+  },
+  getVersion: async (noteId, versionId) => {
+    return await axios.get(
+      process.env.REACT_APP_DOMAIN +
+        '/api/1.0/version/' +
+        noteId +
+        '/' +
+        versionId
+    );
+  },
 };
 
 export default useRequest;

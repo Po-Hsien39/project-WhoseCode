@@ -35,6 +35,7 @@ app.use(
     require('./server/routes/code_route'),
     require('./server/routes/user_route'),
     require('./server/routes/note_route'),
+    require('./server/routes/version_route'),
   ]
 );
 server.listen(PORT, () => {

@@ -19,11 +19,16 @@ const createNote = async (user_id, star) => {
     'INSERT INTO notes (user_id, star) VALUES (?, ?)',
     [user_id, star]
   );
+  await Note.create({ noteId: insertId });
   return insertId;
+};
+
+const modifyNote = async (noteId, star) => {
+  await pool.query('UPDATE notes SET star = ? WHERE id = ?', [star, noteId]);
 };
 
 const deleteNote = async (id) => {
   await pool.query('DELETE FROM notes WHERE id = ?', [id]);
 };
 
-module.exports = { createNote, getAllNotes, getNote, deleteNote };
+module.exports = { createNote, getAllNotes, getNote, deleteNote, modifyNote };

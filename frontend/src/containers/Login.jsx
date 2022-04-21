@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../hook/useSnackbar';
 import { useStatus } from '../hook/useStatus';
 import Input from '../components/Login/Input';
-import axios from 'axios';
 import Background from '../assets/background.png';
 import BottomBackground from '../assets/background2.png';
 
@@ -42,7 +41,6 @@ const Login = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    console.log(process.env.REACT_APP_DOMAIN);
     if (values.password !== values.confirmPassword) {
       setWrongPassword(true);
     } else {

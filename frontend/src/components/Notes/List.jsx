@@ -11,9 +11,9 @@ import {
 import { useState } from 'react';
 import { useStatus } from '../../hook/useStatus';
 
-const List = ({ type, title, id }) => {
+const List = ({ type, title, id, star }) => {
   const [onHover, setOnHover] = useState(false);
-  const { setNote } = useStatus();
+  const { setNote, note, setVersionNote } = useStatus();
 
   const iconPicker = (text) => {
     if (text === 'Home') {
@@ -38,9 +38,10 @@ const List = ({ type, title, id }) => {
   const handleClick = () => {
     console.log(type, id);
     if (type === 'note') {
-      console.log('note');
-      setNote({ id });
+      setVersionNote({ id: '', version: '', content: '' });
+      setNote({ id, star });
     } else if (title === 'Home') {
+      setVersionNote({ id: '', version: '', content: '' });
       setNote({ id: null });
     } else {
       console.log('Function not support');
@@ -56,6 +57,7 @@ const List = ({ type, title, id }) => {
           width: '100%',
           display: 'flex',
           justifyContent: 'flex-start',
+          background: note.id === id ? 'rgba(0, 0, 0, 0.08)' : 'white',
           alignItems: 'center',
           padding: '10px 0',
           '&:hover': {
