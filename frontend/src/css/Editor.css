@@ -37,21 +37,95 @@
 }
 
 .RichEditor-editor .blockStyle {
+  position: relative;
   padding: 5px;
-  margin: 0;
+  margin: 1px 0;
   cursor: pointer;
   /* font-family: 'Hoefler Text', 'Georgia', serif; */
   font-style: italic;
+  /* background-color: #5890ff; */
 }
 
-.RichEditor-editor .blockStyle:hover {
-  background-color: hsla(0, 11%, 98%, 0.991);
+.RichEditor-editor .delete {
+  background-color: #fea6a4;
 }
+
+.RichEditor-editor .delete::before {
+  position: absolute;
+  left: 0;
+  transform: translateX(-100%);
+  content: '-';
+  font-size: 16px;
+  color: #000;
+  /* background-color: #fea6a4; */
+  padding: 0 5px;
+  margin-right: 5px;
+}
+
+.RichEditor-editor .delete:hover {
+  background-color: #ee8280;
+}
+
+.RichEditor-editor .insert {
+  background-color: #97e8bf;
+}
+
+.RichEditor-editor .insert::before {
+  position: absolute;
+  left: 0;
+  transform: translateX(-90%);
+  content: '+';
+  font-size: 16px;
+  color: #000;
+  /* background-color: #97e8bf; */
+  padding: 0 5px;
+  margin-right: 5px;
+}
+
+.RichEditor-editor .insert:hover {
+  background-color: #6dcd9d;
+}
+
+.RichEditor-editor .correct {
+  background-color: #dfe5e8;
+}
+
+/* .RichEditor-editor .correct::before {
+  position: absolute;
+  left: 0;
+  transform: translateX(-90%);
+  content: '1';
+  font-size: 16px;
+  color: #000;
+  padding: 0 5px;
+  margin-right: 5px;
+} */
+
+.line {
+  position: relative;
+}
+
+.line::before {
+  content: attr(data-line-number);
+  position: absolute;
+  left: 0;
+  transform: translateX(-180%);
+  top: 0;
+  opacity: 0.5;
+}
+/* .RichEditor-editor .blockStyle:hover {
+} */
 
 .RichEditor-editor .public-DraftStyleDefault-pre {
   background-color: rgba(0, 0, 0, 0.05);
   font-family: 'Inconsolata', 'Menlo', 'Consolas', monospace;
   font-size: 16px;
+  padding: 20px;
+  padding-top: 40px;
+}
+
+.RichEditor-editor .code-block-hide {
+  font-family: 'Inconsolata', 'Menlo', 'Consolas', monospace;
   padding: 20px;
   padding-top: 40px;
 }

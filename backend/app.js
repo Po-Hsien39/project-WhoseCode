@@ -5,7 +5,10 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const morganBody = require('morgan-body');
 const cors = require('cors');
-require('./util/mongo');
+const mongoose = require('mongoose');
+const dbName = 'whosecode';
+
+// require('./util/mongo');
 require('dotenv-defaults').config();
 const { PORT, API_VERSION } = process.env;
 const io = new Server(server, {
@@ -38,6 +41,8 @@ app.use(
     require('./server/routes/version_route'),
   ]
 );
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
+  await mongoose.connect(`mongodb://localhost:27017/${dbName}`);
+  console.log('MongoDB connected');
   console.log('listening on *:' + PORT);
 });

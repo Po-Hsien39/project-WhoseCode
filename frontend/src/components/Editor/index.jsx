@@ -31,11 +31,11 @@ import {
   ContentState,
   ContentBlock,
   getDefaultKeyBinding,
-  SelectionState,
 } from 'draft-js';
 const decorations = new PrismDraftDecorator(Prism.languages.javascript);
 const DraftJSRichTextEditor = ({ noteId, readOnly }) => {
-  const [editorState, setEditorState] = useState(null);
+  const { editorState, setEditorState } = useStatus();
+  // const [editorState, setEditorState] = useState(null);
   const [content, setContent] = useState(null);
   const { socket, note, request } = useStatus();
   const editorRef = useRef(null);
@@ -45,8 +45,12 @@ const DraftJSRichTextEditor = ({ noteId, readOnly }) => {
     }
   }, [noteId]);
   useEffect(() => {
+    console.log('editorState', editorState);
+  }, [editorState]);
+  useEffect(() => {
     console.log(content);
-    if (content) {
+    console.log(setEditorState);
+    if (content && setEditorState) {
       const setPreview = async () => {
         let res = await request.getNote(note.id);
         if (!res.data.note) {
@@ -70,7 +74,7 @@ const DraftJSRichTextEditor = ({ noteId, readOnly }) => {
       };
       setPreview();
     }
-  }, [content]);
+  }, [content, setEditorState]);
   useEffect(() => {
     if (socket && editorState && noteId) {
       debounceLoadData(socket, editorState.getCurrentContent(), noteId);

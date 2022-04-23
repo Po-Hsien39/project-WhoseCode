@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.7.0",

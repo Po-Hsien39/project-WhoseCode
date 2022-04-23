@@ -25,14 +25,9 @@ const CodeWrapper = (props) => {
 
   const getCode = async (e) => {
     const svg = e.target.parentElement.querySelector('svg');
-    // .parentElement.parentElement.parentElement
-    //   .parentElement;
-    console.log(svg);
     const codeBlock =
       svg.parentElement.parentElement.parentElement.parentElement.parentElement;
 
-    console.log(codeBlock);
-    // console.log(codeBlock.parentElement);
     const codes = codeBlock.querySelectorAll('section.code');
     let codeText = '';
     codes.forEach((code) => {
@@ -91,7 +86,12 @@ const CodeWrapper = (props) => {
 
   return (
     <Box
-      sx={{ position: 'relative' }}
+      sx={{
+        position: 'relative',
+        marginBottom: '20px',
+        marginTop: '20px',
+        // display: props.delete ? 'none' : 'block',
+      }}
       onMouseEnter={() => setShowFunc(true)}
       onMouseLeave={() => setShowFunc(false)}>
       <Fade in={showFunc}>
@@ -102,7 +102,7 @@ const CodeWrapper = (props) => {
             position: 'absolute',
             top: 0,
             width: '100%',
-            display: 'flex',
+            display: props.delete ? 'none' : 'flex',
             alignItems: 'center',
             transform: 'translateY(3px)',
             transition: 'all 10s ease',
@@ -118,13 +118,16 @@ const CodeWrapper = (props) => {
               <option value="c++">C++</option>
             </select>
           </Grid>
-          <Grid item xs={12} md={8.5}></Grid>
+          <Grid item xs={12} md={7.75}></Grid>
           <Grid item xs={12} md={1.5}>
             <Box
               contentEditable={false}
               readOnly
               className="exec-btns"
-              sx={{ display: 'flex', justifyContent: 'space-around' }}>
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-around',
+              }}>
               <Tooltip title="Run Code" placement="top">
                 <IconButton onClick={(e) => execCode(e)}>
                   <PlayArrowIcon />
@@ -144,7 +147,11 @@ const CodeWrapper = (props) => {
           </Grid>
         </Grid>
       </Fade>
-      <div className="public-DraftStyleDefault-pre" {...props}></div>
+      <div
+        className={
+          props.delete ? 'code-block-hide' : 'public-DraftStyleDefault-pre'
+        }
+        {...props}></div>
       <Box className="code-result" contentEditable={false} readOnly>
         {codeResult}
       </Box>

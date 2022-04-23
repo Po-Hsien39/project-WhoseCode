@@ -6,7 +6,6 @@ import {
   Box,
   Drawer,
   CssBaseline,
-  AppBar as MuiAppBar,
   List,
   Typography,
   Divider,
@@ -14,6 +13,8 @@ import {
   ButtonBase,
   Avatar,
   Button,
+  Stack,
+  Chip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -72,7 +73,16 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 export default function PersistentDrawerLeft() {
-  const { user, request, setNote, notes, setNotes, note } = useStatus();
+  const {
+    user,
+    request,
+    setNote,
+    notes,
+    setNotes,
+    note,
+    diffVersion,
+    versionNote,
+  } = useStatus();
   const theme = useTheme();
   const [open, setOpen] = useState(true);
   const [rightopen, setRightopen] = useState(false);
@@ -128,7 +138,7 @@ export default function PersistentDrawerLeft() {
   };
 
   const editFavorite = async () => {
-    await request.updateNote(note.id, !note.star);
+    await request.addStarToNote(note.id, !note.star);
     setNote((prev) => ({ ...prev, star: !prev.star }));
     setNotes((notes) => {
       let newNotes = { ...notes };
@@ -157,7 +167,7 @@ export default function PersistentDrawerLeft() {
       <Box
         sx={{
           marginLeft: 'auto',
-          position: 'absolute',
+          position: 'fixed',
           right: 0,
           top: '10px',
           zIndex: 100,
@@ -216,6 +226,25 @@ export default function PersistentDrawerLeft() {
           <Typography variant="h6" noWrap component="div">
             WhoseCode
           </Typography>
+          {note.id && (
+            <Stack direction="row" spacing={1} sx={{ marginLeft: '20px' }}>
+              {note.star && (
+                <Chip label="Collected" sx={{ backgroundColor: '#F2D399' }} />
+              )}
+              <Chip
+                label={
+                  versionNote.id ? `Version ${versionNote.version}` : `Latest`
+                }
+                sx={{ backgroundColor: '#C2C9F2' }}
+              />
+              {versionNote.version && (
+                <Chip label="Read Only" sx={{ backgroundColor: '#B9D4E1' }} />
+              )}
+              {diffVersion.compare && (
+                <Chip label="Show Diff" sx={{ backgroundColor: '#F5FDFF' }} />
+              )}
+            </Stack>
+          )}
         </Toolbar>
       </DrawerAppbar>
       <Drawer
@@ -256,7 +285,7 @@ export default function PersistentDrawerLeft() {
         <Divider />
         <List>
           {['Home', 'Quick Find', 'All Updates', 'Setting'].map((text) => (
-            <MyList title={text} key={text} />
+            <MyList title={text} key={text} setRightopen={setRightopen} />
           ))}
         </List>
         {notes.collect?.length ? (

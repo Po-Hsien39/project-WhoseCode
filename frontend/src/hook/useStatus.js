@@ -12,6 +12,10 @@ const StatusContext = createContext({
   setNotes: () => {},
   versionNote: {},
   setVersionNote: () => {},
+  editorState: null,
+  setEditorState: () => {},
+  diffVersion: {},
+  setDiffVersion: () => {},
 });
 
 const StatusProvider = (props) => {
@@ -28,12 +32,19 @@ const StatusProvider = (props) => {
     version: '',
     content: '',
   });
+  const [diffVersion, setDiffVersion] = useState({
+    compare: false,
+    diff: null,
+    latest: null,
+    showCurrent: false,
+  });
   const [note, setNote] = useState({
     id: null,
     star: false,
   });
   const [request, setRequest] = useState(Request);
   const [socket, setSocket] = useState(null);
+  const [editorState, setEditorState] = useState(null);
 
   useEffect(() => {
     console.log(versionNote);
@@ -77,6 +88,10 @@ const StatusProvider = (props) => {
         setNotes,
         versionNote,
         setVersionNote,
+        editorState,
+        setEditorState,
+        diffVersion,
+        setDiffVersion,
       }}
       {...props}
     />

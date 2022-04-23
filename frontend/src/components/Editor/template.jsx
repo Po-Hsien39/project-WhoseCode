@@ -19,7 +19,8 @@ const DraftJSRichTextEditor = ({ versionNote }) => {
 
   useEffect(() => {
     if (versionNote) {
-      console.log('raw', versionNote.content);
+      console.log('versionNote', versionNote);
+      console.log(JSON.parse(versionNote.content));
       const contentState = convertFromRaw(JSON.parse(versionNote.content));
       setEditorState(EditorState.createWithContent(contentState, decorations));
     }
@@ -103,12 +104,12 @@ const DraftJSRichTextEditor = ({ versionNote }) => {
 };
 
 function getBlockStyle(block) {
-  switch (block.getType()) {
-    case 'blockquote':
-      return 'RichEditor-blockquote';
-    default:
-      return 'blockStyle';
-  }
+  const type = block.getType();
+  if (type === 'blockquote') return 'RichEditor-blockquote';
+  else if (type.includes('-insert')) return 'blockStyle insert';
+  else if (type.includes('-remove')) return 'blockStyle delete';
+  else if (type.includes('-correct')) return 'blockStyle correct';
+  return 'blockStyle';
 }
 
 class StyleButton extends Component {

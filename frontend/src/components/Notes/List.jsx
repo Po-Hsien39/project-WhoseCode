@@ -11,9 +11,10 @@ import {
 import { useState } from 'react';
 import { useStatus } from '../../hook/useStatus';
 
-const List = ({ type, title, id, star }) => {
+const List = ({ type, title, id, star, setRightopen }) => {
   const [onHover, setOnHover] = useState(false);
-  const { setNote, note, setVersionNote } = useStatus();
+  const { setNote, note, setVersionNote, setDiffVersion, diffVersion } =
+    useStatus();
 
   const iconPicker = (text) => {
     if (text === 'Home') {
@@ -36,7 +37,16 @@ const List = ({ type, title, id, star }) => {
   };
 
   const handleClick = () => {
-    console.log(type, id);
+    console.log(setRightopen);
+    if (setRightopen) setRightopen(false);
+    if (diffVersion.compare) {
+      setDiffVersion({
+        compare: false,
+        diff: null,
+        latest: null,
+        showCurrent: false,
+      });
+    }
     if (type === 'note') {
       setVersionNote({ id: '', version: '', content: '' });
       setNote({ id, star });

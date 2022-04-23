@@ -112,7 +112,7 @@ class Article {
     blocks = blocks.blocks;
     let current = this.blocks;
     for (let i = 0; i < blocks.length; i++) {
-      if (i == 0) {
+      if (i === 0) {
         current.style = blocks[i].style;
         current.next.insertInitialize(blocks[i].text);
       } else {

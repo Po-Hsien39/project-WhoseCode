@@ -27,8 +27,25 @@ const modifyNote = async (noteId, star) => {
   await pool.query('UPDATE notes SET star = ? WHERE id = ?', [star, noteId]);
 };
 
+const rollBackNote = async (noteId, versionId, content) => {
+  let { diff } = await Note.findOne({ noteId });
+  diff = diff.slice(0, versionId);
+
+  await Note.findOneAndUpdate(
+    { noteId },
+    { diff, latest: content, version: content }
+  );
+};
+
 const deleteNote = async (id) => {
   await pool.query('DELETE FROM notes WHERE id = ?', [id]);
 };
 
-module.exports = { createNote, getAllNotes, getNote, deleteNote, modifyNote };
+module.exports = {
+  createNote,
+  getAllNotes,
+  getNote,
+  deleteNote,
+  modifyNote,
+  rollBackNote,
+};

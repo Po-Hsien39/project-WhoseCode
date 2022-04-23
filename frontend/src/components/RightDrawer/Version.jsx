@@ -9,13 +9,29 @@ import {
   Chip,
   Stack,
   Button,
+  Modal,
 } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useStatus } from '../../hook/useStatus';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
+import DifferenceIcon from '@mui/icons-material/Difference';
+import ForkLeftIcon from '@mui/icons-material/ForkLeft';
+import ModalContent from './ModalContent';
 
 const Version = () => {
-  const { request, note, setVersionNote, versionNote } = useStatus();
+  const {
+    request,
+    note,
+    setVersionNote,
+    versionNote,
+    setDiffVersion,
+    diffVersion,
+  } = useStatus();
   const [versions, setVersions] = useState([]);
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [modalType, setModalType] = useState(null);
 
   useEffect(() => {
     const getVersions = async () => {
@@ -25,9 +41,37 @@ const Version = () => {
     };
     getVersions();
   }, [note]);
+  useEffect(() => {
+    console.log(modalType);
+  }, [modalType]);
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 600,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+  };
 
   return (
     <Fragment>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description">
+        <Box sx={style}>
+          <ModalContent
+            type={modalType}
+            setOpen={setOpen}
+            setVersions={setVersions}
+          />
+        </Box>
+      </Modal>
+
       {versions.length ? (
         <Box>
           <Box sx={{ width: '100%', padding: '15px' }}>
@@ -36,25 +80,34 @@ const Version = () => {
           <Divider />
           {versions.map((version, i) => {
             return (
-              <Fragment>
+              <Fragment key={i}>
                 <ButtonBase
-                  key={i}
                   sx={{
                     width: '100%',
                     borderBottom:
                       versionNote.version === i + 1
-                        ? 'none'
+                        ? '2px solid #E0E0E0'
                         : '1px solid #E0E0E0',
                     background:
                       versionNote.version === i + 1 ? '#EBEBEB' : 'white',
                   }}
                   onClick={async () => {
-                    let res = await request.getVersion(note.id, i + 1);
-                    setVersionNote({
-                      content: res.data.version,
-                      id: note.id,
-                      version: i + 1,
-                    });
+                    if (diffVersion.compare) {
+                      setDiffVersion({
+                        compare: false,
+                        diff: null,
+                        latest: null,
+                        showCurrent: false,
+                      });
+                    }
+                    if (versionNote.version !== i + 1) {
+                      let res = await request.getVersion(note.id, i + 1);
+                      setVersionNote({
+                        content: res.data.version,
+                        id: note.id,
+                        version: i + 1,
+                      });
+                    }
                   }}>
                   <Grid
                     container
@@ -103,24 +156,76 @@ const Version = () => {
                 {versionNote.version === i + 1 ? (
                   <Grid
                     container
-                    noWrap
                     sx={{
                       borderBottom: '1px solid #E0E0E0',
                       background: '#EBEBEB',
                       padding: '10px',
                     }}>
-                    <Grid item xs={12} md={2}></Grid>
-                    <Grid item xs={12} md={4}>
-                      <Button variant="contained" color="tetiary">
+                    {/* <Grid item xs={12} md={1.75}></Grid> */}
+                    <Grid
+                      item
+                      xs={12}
+                      md={5}
+                      sx={{ display: 'flex', justifyContent: 'center' }}>
+                      <Button
+                        variant="contained"
+                        color="tetiary"
+                        onClick={() => {
+                          if (diffVersion.compare) {
+                            setDiffVersion({
+                              compare: false,
+                              diff: null,
+                              latest: null,
+                              showCurrent: false,
+                            });
+                          }
+                          setModalType('rollback');
+                          setOpen(true);
+                        }}>
+                        <SettingsBackupRestoreIcon />
                         Roll Back
                       </Button>
                     </Grid>
-                    <Grid item xs={12} md={4}>
-                      <Button variant="contained" color="tetiary">
-                        View Diff
+                    <Grid
+                      item
+                      xs={12}
+                      md={3.5}
+                      sx={{ display: 'flex', justifyContent: 'center' }}>
+                      <Button
+                        variant="contained"
+                        color="tetiary"
+                        onClick={() => {
+                          setModalType('diff');
+                          setOpen(true);
+                        }}>
+                        <DifferenceIcon />
+                        Diff
                       </Button>
                     </Grid>
-                    {/* <Chip label={`View Diff`} color="primary" /> */}
+                    <Grid
+                      item
+                      xs={12}
+                      md={3.5}
+                      sx={{ display: 'flex', justifyContent: 'center' }}>
+                      <Button
+                        variant="contained"
+                        color="tetiary"
+                        onClick={() => {
+                          setModalType('fork');
+                          setOpen(true);
+                          if (diffVersion.compare) {
+                            setDiffVersion({
+                              compare: false,
+                              diff: null,
+                              latest: null,
+                              showCurrent: false,
+                            });
+                          }
+                        }}>
+                        <ForkLeftIcon sx={{ marginRight: '.5px' }} />
+                        Fork
+                      </Button>
+                    </Grid>
                   </Grid>
                 ) : null}
               </Fragment>

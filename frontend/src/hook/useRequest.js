@@ -43,10 +43,17 @@ const useRequest = {
       process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId
     );
   },
-  updateNote: async (noteId, star) => {
+  addStarToNote: async (noteId, star) => {
     return await axios.put(
       process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
-      { star }
+      { star, type: 'star' }
+    );
+  },
+  rollBackNote: async (noteId, version, content) => {
+    console.log(noteId, version, content);
+    return await axios.put(
+      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      { type: 'rollback', version, content }
     );
   },
   getVersions: async (noteId) => {

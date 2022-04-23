@@ -16,6 +16,7 @@ const theme = createTheme({
     },
     tetiary: {
       main: '#f5e6ed',
+      // main: '#73C0F4',
       light: '#e8a7c8',
       dark: '#f0d8e4',
     },

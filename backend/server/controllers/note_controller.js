@@ -24,10 +24,16 @@ const createNote = async (req, res) => {
 };
 
 const modifyNote = async (req, res) => {
-  const { star } = req.body;
+  const { type, star, version, content } = req.body;
   const { id: noteId } = req.params;
   if (!noteId) return res.status(400).send('noteId is required');
-  await Note.modifyNote(noteId, star);
+  if (!type) return res.status(400).send('type is required');
+
+  if (type === 'star') {
+    await Note.modifyNote(noteId, star);
+  } else if (type === 'rollback') {
+    await Note.rollBackNote(noteId, version, content);
+  }
   res.send({ status: 'success' });
 };
 
