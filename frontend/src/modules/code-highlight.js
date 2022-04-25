@@ -58,9 +58,8 @@ class PrismDraftDecorator {
     var blockKey = parts[0];
     var tokId = parts[1];
     var token = this.highlighted[blockKey][tokId];
-
     return {
-      tokType: token.type,
+      tokType: token?.type,
     };
   }
 }

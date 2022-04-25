@@ -16,7 +16,21 @@ const StatusContext = createContext({
   setEditorState: () => {},
   diffVersion: {},
   setDiffVersion: () => {},
+  createNoteDetails: {},
+  setCreateNoteDetails: () => {},
+  setDefaultCreate: () => {},
 });
+
+const defaultPermission = {
+  title: '',
+  star: false,
+  permission: {
+    openToPublic: true,
+    allowEdit: false,
+    allowComment: false,
+    allowDuplicate: true,
+  },
+};
 
 const StatusProvider = (props) => {
   const [user, setUser] = useState({
@@ -25,8 +39,14 @@ const StatusProvider = (props) => {
     email: '',
     login: false,
   });
-
+  const [createNoteDetails, setCreateNoteDetails] = useState(defaultPermission);
+  const setDefaultCreate = () => {
+    setCreateNoteDetails(defaultPermission);
+  };
   const [notes, setNotes] = useState({ private: [], collect: [], delete: [] });
+  useEffect(() => {
+    console.log(notes);
+  }, [notes]);
   const [versionNote, setVersionNote] = useState({
     id: '',
     version: '',
@@ -41,14 +61,18 @@ const StatusProvider = (props) => {
   const [note, setNote] = useState({
     id: null,
     star: false,
+    url: '',
+    permission: {
+      openToPublic: false,
+      allowEdit: false,
+      allowComment: false,
+      allowDuplicate: false,
+      allowOthers: [],
+    },
   });
   const [request, setRequest] = useState(Request);
   const [socket, setSocket] = useState(null);
   const [editorState, setEditorState] = useState(null);
-
-  useEffect(() => {
-    console.log(versionNote);
-  }, [versionNote]);
 
   useEffect(() => {
     const socket = io(process.env.REACT_APP_SOCKET_URL);
@@ -92,6 +116,9 @@ const StatusProvider = (props) => {
         setEditorState,
         diffVersion,
         setDiffVersion,
+        createNoteDetails,
+        setCreateNoteDetails,
+        setDefaultCreate,
       }}
       {...props}
     />

@@ -10,12 +10,13 @@ import {
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { useStatus } from '../../hook/useStatus';
+import { useNavigate } from 'react-router-dom';
 
-const List = ({ type, title, id, star, setRightopen }) => {
+const List = ({ type, title, id, star, setRightopen, url }) => {
   const [onHover, setOnHover] = useState(false);
   const { setNote, note, setVersionNote, setDiffVersion, diffVersion } =
     useStatus();
-
+  const navigate = useNavigate();
   const iconPicker = (text) => {
     if (text === 'Home') {
       return <HomeIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />;
@@ -49,10 +50,10 @@ const List = ({ type, title, id, star, setRightopen }) => {
     }
     if (type === 'note') {
       setVersionNote({ id: '', version: '', content: '' });
-      setNote({ id, star });
+      setNote({ ...note, id, star, url });
+      navigate(`/notes/${url}`);
     } else if (title === 'Home') {
-      setVersionNote({ id: '', version: '', content: '' });
-      setNote({ id: null });
+      navigate('/notes/all');
     } else {
       console.log('Function not support');
     }
@@ -67,7 +68,8 @@ const List = ({ type, title, id, star, setRightopen }) => {
           width: '100%',
           display: 'flex',
           justifyContent: 'flex-start',
-          background: note.id === id ? 'rgba(0, 0, 0, 0.08)' : 'white',
+          background:
+            type === 'note' && note.id === id ? 'rgba(0, 0, 0, 0.08)' : 'white',
           alignItems: 'center',
           padding: '10px 0',
           '&:hover': {

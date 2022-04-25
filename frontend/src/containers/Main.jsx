@@ -6,9 +6,9 @@ import Notes from './Notes';
 const Main = () => {
   return (
     <Routes>
-      <Route path="/" element={<Welcome />}></Route>
       <Route path="/login" element={<Login />} />
-      <Route path="/notes" element={<Notes />}></Route>
+      <Route path="/notes/:id" element={<Notes />}></Route>
+      <Route path="/" element={<Welcome />}></Route>
     </Routes>
   );
 };

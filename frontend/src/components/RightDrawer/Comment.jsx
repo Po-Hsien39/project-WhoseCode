@@ -22,43 +22,62 @@ const Comment = () => {
     <Fragment>
       {testComments.length ? (
         <Box>
-          <Box sx={{ width: '100%', padding: '15px' }}>
+          <Box
+            sx={{
+              width: '100%',
+              padding: '15px',
+              paddingTop: '79px',
+              position: 'fixed',
+              // backgroundColor: '#fff',
+            }}>
             <Typography variant="h8">Comments</Typography>
           </Box>
-          <Divider />
-          {testComments.map((comment, i) => {
-            return (
-              <ButtonBase
-                key={i}
-                sx={{ width: '100%', borderBottom: '1px solid #E0E0E0' }}>
-                <Grid container sx={{ padding: '15px' }}>
-                  <Grid item xs={12} md={2}>
-                    <Avatar
-                      sx={{ border: '1px solid #E0E0E0' }}
-                      src={`//joeschmoe.io/api/v1/${comment.name || 'Tristan'}`}
-                    />
+          <Box
+            sx={{
+              position: 'fixed',
+              paddingTop: '118px',
+              zIndex: 80,
+              width: '100%',
+            }}>
+            <Divider />
+          </Box>
+          <Box sx={{ paddingTop: '118px' }}>
+            {testComments.map((comment, i) => {
+              return (
+                <ButtonBase
+                  key={i}
+                  sx={{ width: '100%', borderBottom: '1px solid #E0E0E0' }}>
+                  <Grid container sx={{ padding: '15px' }}>
+                    <Grid item xs={12} md={2}>
+                      <Avatar
+                        sx={{ border: '1px solid #E0E0E0' }}
+                        src={`//joeschmoe.io/api/v1/${
+                          comment.name || 'Tristan'
+                        }`}
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      xs={12}
+                      md={10}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                      }}>
+                      <Typography variant="h8" sx={{ marginBottom: '5px' }}>
+                        {comment.comment}
+                      </Typography>
+                      <Typography variant="h8" sx={{ color: 'gray' }}>
+                        {'6 hours ago'}
+                      </Typography>
+                    </Grid>
                   </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    md={10}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'flex-start',
-                    }}>
-                    <Typography variant="h8" sx={{ marginBottom: '5px' }}>
-                      {comment.comment}
-                    </Typography>
-                    <Typography variant="h8" sx={{ color: 'gray' }}>
-                      {'6 hours ago'}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </ButtonBase>
-            );
-          })}
+                </ButtonBase>
+              );
+            })}
+          </Box>
         </Box>
       ) : (
         <Box

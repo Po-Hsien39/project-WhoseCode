@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
 import { styled, useTheme } from '@mui/material/styles';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Tooltip,
   Toolbar,
@@ -12,7 +13,6 @@ import {
   IconButton,
   ButtonBase,
   Avatar,
-  Button,
   Stack,
   Chip,
 } from '@mui/material';
@@ -33,6 +33,8 @@ import MyList from '../components/Notes/List';
 import DrawerContent from '../components/RightDrawer';
 import DrawerAppbar from '../components/DrawerAppbar';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import PopoverPopupState from '../components/RightDrawer/Share';
+import Create from '../components/Notes/Create';
 const drawerWidth = 240;
 const drawerRight = 400;
 
@@ -82,19 +84,21 @@ export default function PersistentDrawerLeft() {
     note,
     diffVersion,
     versionNote,
+    setVersionNote,
+    setDefaultCreate,
   } = useStatus();
   const theme = useTheme();
   const [open, setOpen] = useState(true);
   const [rightopen, setRightopen] = useState(false);
   const [rightDrawerType, setRightDrawerType] = useState(null);
-  useEffect(() => {
-    console.log(note);
-  }, [note]);
+  const [createModal, setCreateModal] = useState(false);
+  const { id: currentUrl } = useParams();
+  const [createPage, setCreatePage] = useState({ page: 1, type: 'next' });
+  // Get User Notes
   useEffect(() => {
     if (user.id) {
       const fetchNotes = async () => {
         const res = await request.getAllNotes(user.id);
-        console.log(res);
         let currentNotes = res.data.notes.reduce((acc, note) => {
           if (note.deleted) {
             acc['delete'] ? acc['delete'].push(note) : (acc['delete'] = [note]);
@@ -109,24 +113,36 @@ export default function PersistentDrawerLeft() {
           }
           return acc;
         }, {});
+        console.log('currentNotes', currentNotes);
+        // if
         setNotes(currentNotes);
       };
       fetchNotes();
     }
   }, [user]);
-
   useEffect(() => {
-    console.log('notes', notes);
-  }, [notes]);
-
+    const getNote = async () => {
+      if (currentUrl) {
+        // No note selected
+        if (currentUrl === 'all') {
+          setVersionNote({ id: '', version: '', content: '' });
+          setNote({ ...note, star: false, id: null, url: null });
+        } else {
+          console.log('currentUrl', currentUrl);
+          // let res = await request.getNote(currentUrl);
+          setNote((prev) => {
+            return { ...prev, url: currentUrl };
+          });
+          // console.log(res);
+        }
+      }
+    };
+    getNote();
+  }, [currentUrl]);
   const createNote = async () => {
-    let note = await request.createNote();
-    console.log('note', note);
-    setNote({ ...note, id: note.data.noteId });
-    setNotes([
-      ...notes,
-      { deleted: 0, id: note.data.noteId, star: 0, title: null },
-    ]);
+    setCreatePage({ page: 1, type: 'next' });
+    setCreateModal(true);
+    setDefaultCreate();
   };
 
   const handleDrawerOpen = () => {
@@ -138,11 +154,13 @@ export default function PersistentDrawerLeft() {
   };
 
   const editFavorite = async () => {
+    console.log(note);
     await request.addStarToNote(note.id, !note.star);
     setNote((prev) => ({ ...prev, star: !prev.star }));
     setNotes((notes) => {
       let newNotes = { ...notes };
       let targetNote;
+      console.log(note);
       if (note.star) {
         newNotes.collect = newNotes.collect.filter((item) => {
           if (item.id === note.id) targetNote = item;
@@ -164,6 +182,12 @@ export default function PersistentDrawerLeft() {
   };
   return (
     <Box sx={{ display: 'flex' }}>
+      <Create
+        open={createModal}
+        setOpen={setCreateModal}
+        page={createPage}
+        setPage={setCreatePage}
+      />
       <Box
         sx={{
           marginLeft: 'auto',
@@ -172,9 +196,7 @@ export default function PersistentDrawerLeft() {
           top: '10px',
           zIndex: 100,
         }}>
-        <Tooltip title="Share With Others" placement="bottom">
-          <Button sx={{ color: 'black' }}>Share</Button>
-        </Tooltip>
+        <PopoverPopupState />
         <Tooltip title="View Comments" placement="bottom">
           <IconButton
             onClick={() => {
@@ -228,9 +250,9 @@ export default function PersistentDrawerLeft() {
           </Typography>
           {note.id && (
             <Stack direction="row" spacing={1} sx={{ marginLeft: '20px' }}>
-              {note.star && (
+              {note.star ? (
                 <Chip label="Collected" sx={{ backgroundColor: '#F2D399' }} />
-              )}
+              ) : null}
               <Chip
                 label={
                   versionNote.id ? `Version ${versionNote.version}` : `Latest`
@@ -310,6 +332,7 @@ export default function PersistentDrawerLeft() {
               return (
                 <MyList
                   title={note.title}
+                  url={note.url}
                   type={'note'}
                   id={note.id}
                   star={true}
@@ -339,7 +362,13 @@ export default function PersistentDrawerLeft() {
         {notes.private
           ? notes.private.map((note, i) => {
               return (
-                <MyList title={note.title} type={'note'} id={note.id} key={i} />
+                <MyList
+                  title={note.title}
+                  url={note.url}
+                  type={'note'}
+                  id={note.id}
+                  key={i}
+                />
               );
             })
           : null}
@@ -379,8 +408,11 @@ export default function PersistentDrawerLeft() {
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
+            zIndex: '100',
+            position: 'fixed',
           }}>
           <IconButton
+            sx={{ position: 'fixed', zIndex: 101 }}
             onClick={() => {
               setRightopen(false);
             }}>

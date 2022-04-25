@@ -74,163 +74,181 @@ const Version = () => {
 
       {versions.length ? (
         <Box>
-          <Box sx={{ width: '100%', padding: '15px' }}>
+          <Box
+            sx={{
+              width: '100%',
+              padding: '15px',
+              paddingTop: '79px',
+              zIndex: 20,
+              position: 'fixed',
+              backgroundColor: '#fff',
+            }}>
             <Typography variant="h8">Versions</Typography>
           </Box>
-          <Divider />
-          {versions.map((version, i) => {
-            return (
-              <Fragment key={i}>
-                <ButtonBase
-                  sx={{
-                    width: '100%',
-                    borderBottom:
-                      versionNote.version === i + 1
-                        ? '2px solid #E0E0E0'
-                        : '1px solid #E0E0E0',
-                    background:
-                      versionNote.version === i + 1 ? '#EBEBEB' : 'white',
-                  }}
-                  onClick={async () => {
-                    if (diffVersion.compare) {
-                      setDiffVersion({
-                        compare: false,
-                        diff: null,
-                        latest: null,
-                        showCurrent: false,
-                      });
-                    }
-                    if (versionNote.version !== i + 1) {
-                      let res = await request.getVersion(note.id, i + 1);
-                      setVersionNote({
-                        content: res.data.version,
-                        id: note.id,
-                        version: i + 1,
-                      });
-                    }
-                  }}>
-                  <Grid
-                    container
+          <Box
+            sx={{
+              position: 'fixed',
+              paddingTop: '118px',
+              zIndex: 80,
+              width: '100%',
+            }}>
+            <Divider />
+          </Box>
+          <Box sx={{ paddingTop: '118px' }}>
+            {versions.map((version, i) => {
+              return (
+                <Fragment key={i}>
+                  <ButtonBase
                     sx={{
-                      padding: '15px',
-                      display: 'flex',
-                      alignItems: 'center',
+                      width: '100%',
+                      borderBottom:
+                        versionNote.version === i + 1
+                          ? '2px solid #E0E0E0'
+                          : '1px solid #E0E0E0',
+                      background:
+                        versionNote.version === i + 1 ? '#EBEBEB' : 'white',
+                    }}
+                    onClick={async () => {
+                      if (diffVersion.compare) {
+                        setDiffVersion({
+                          compare: false,
+                          diff: null,
+                          latest: null,
+                          showCurrent: false,
+                        });
+                      }
+                      if (versionNote.version !== i + 1) {
+                        let res = await request.getVersion(note.id, i + 1);
+                        setVersionNote({
+                          content: res.data.version,
+                          id: note.id,
+                          version: i + 1,
+                        });
+                      }
                     }}>
-                    <Grid item xs={12} md={2}>
-                      <Avatar
-                        sx={{ border: '1px solid #E0E0E0' }}
-                        src={`//joeschmoe.io/api/v1/${
-                          version.name || 'Tristan'
-                        }`}
-                      />
-                    </Grid>
                     <Grid
-                      item
-                      xs={12}
-                      md={6}
+                      container
                       sx={{
+                        padding: '15px',
                         display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'flex-start',
+                        alignItems: 'center',
                       }}>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        sx={{ alignItems: 'center' }}>
-                        <Typography variant="h8">
-                          {'Tristan Edited Untitled'}
+                      <Grid item xs={12} md={2}>
+                        <Avatar
+                          sx={{ border: '1px solid #E0E0E0' }}
+                          src={`//joeschmoe.io/api/v1/${
+                            version.name || 'Tristan'
+                          }`}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        xs={12}
+                        md={6}
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          alignItems: 'flex-start',
+                        }}>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ alignItems: 'center' }}>
+                          <Typography variant="h8">
+                            {'Tristan Edited Untitled'}
+                          </Typography>
+                        </Stack>
+                        <Typography
+                          variant="h8"
+                          sx={{ color: 'gray', marginTop: '5px' }}>
+                          {version.date}
                         </Typography>
-                      </Stack>
-                      <Typography
-                        variant="h8"
-                        sx={{ color: 'gray', marginTop: '5px' }}>
-                        {version.date}
-                      </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Chip label={`version ${i + 1}`} color="primary" />
+                      </Grid>
                     </Grid>
-                    <Grid item xs={12} md={4}>
-                      <Chip label={`version ${i + 1}`} color="primary" />
-                    </Grid>
-                  </Grid>
-                </ButtonBase>
-                {versionNote.version === i + 1 ? (
-                  <Grid
-                    container
-                    sx={{
-                      borderBottom: '1px solid #E0E0E0',
-                      background: '#EBEBEB',
-                      padding: '10px',
-                    }}>
-                    {/* <Grid item xs={12} md={1.75}></Grid> */}
+                  </ButtonBase>
+                  {versionNote.version === i + 1 ? (
                     <Grid
-                      item
-                      xs={12}
-                      md={5}
-                      sx={{ display: 'flex', justifyContent: 'center' }}>
-                      <Button
-                        variant="contained"
-                        color="tetiary"
-                        onClick={() => {
-                          if (diffVersion.compare) {
-                            setDiffVersion({
-                              compare: false,
-                              diff: null,
-                              latest: null,
-                              showCurrent: false,
-                            });
-                          }
-                          setModalType('rollback');
-                          setOpen(true);
-                        }}>
-                        <SettingsBackupRestoreIcon />
-                        Roll Back
-                      </Button>
+                      container
+                      sx={{
+                        borderBottom: '1px solid #E0E0E0',
+                        background: '#EBEBEB',
+                        padding: '10px',
+                      }}>
+                      {/* <Grid item xs={12} md={1.75}></Grid> */}
+                      <Grid
+                        item
+                        xs={12}
+                        md={5}
+                        sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Button
+                          variant="contained"
+                          color="tetiary"
+                          onClick={() => {
+                            if (diffVersion.compare) {
+                              setDiffVersion({
+                                compare: false,
+                                diff: null,
+                                latest: null,
+                                showCurrent: false,
+                              });
+                            }
+                            setModalType('rollback');
+                            setOpen(true);
+                          }}>
+                          <SettingsBackupRestoreIcon />
+                          Roll Back
+                        </Button>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={12}
+                        md={3.5}
+                        sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Button
+                          variant="contained"
+                          color="tetiary"
+                          onClick={() => {
+                            setModalType('diff');
+                            setOpen(true);
+                          }}>
+                          <DifferenceIcon />
+                          Diff
+                        </Button>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={12}
+                        md={3.5}
+                        sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Button
+                          variant="contained"
+                          color="tetiary"
+                          onClick={() => {
+                            setModalType('fork');
+                            setOpen(true);
+                            if (diffVersion.compare) {
+                              setDiffVersion({
+                                compare: false,
+                                diff: null,
+                                latest: null,
+                                showCurrent: false,
+                              });
+                            }
+                          }}>
+                          <ForkLeftIcon sx={{ marginRight: '.5px' }} />
+                          Fork
+                        </Button>
+                      </Grid>
                     </Grid>
-                    <Grid
-                      item
-                      xs={12}
-                      md={3.5}
-                      sx={{ display: 'flex', justifyContent: 'center' }}>
-                      <Button
-                        variant="contained"
-                        color="tetiary"
-                        onClick={() => {
-                          setModalType('diff');
-                          setOpen(true);
-                        }}>
-                        <DifferenceIcon />
-                        Diff
-                      </Button>
-                    </Grid>
-                    <Grid
-                      item
-                      xs={12}
-                      md={3.5}
-                      sx={{ display: 'flex', justifyContent: 'center' }}>
-                      <Button
-                        variant="contained"
-                        color="tetiary"
-                        onClick={() => {
-                          setModalType('fork');
-                          setOpen(true);
-                          if (diffVersion.compare) {
-                            setDiffVersion({
-                              compare: false,
-                              diff: null,
-                              latest: null,
-                              showCurrent: false,
-                            });
-                          }
-                        }}>
-                        <ForkLeftIcon sx={{ marginRight: '.5px' }} />
-                        Fork
-                      </Button>
-                    </Grid>
-                  </Grid>
-                ) : null}
-              </Fragment>
-            );
-          })}
+                  ) : null}
+                </Fragment>
+              );
+            })}
+          </Box>
         </Box>
       ) : (
         <Box

@@ -17,6 +17,7 @@ import Prism from 'prismjs';
 import { BLOCK_TYPES, styleMap, INLINE_STYLES } from '../../constants/constant';
 import { myBlockRenderer, extendedBlockRenderMap } from './configs/blockRender';
 import { Box, CircularProgress, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import 'prismjs/themes/prism-coy.css';
 import '../../css/Editor.css';
 import _ from 'lodash';
@@ -33,53 +34,64 @@ import {
   getDefaultKeyBinding,
 } from 'draft-js';
 const decorations = new PrismDraftDecorator(Prism.languages.javascript);
-const DraftJSRichTextEditor = ({ noteId, readOnly }) => {
-  const { editorState, setEditorState } = useStatus();
+const DraftJSRichTextEditor = ({ url, readOnly }) => {
+  const { editorState, setEditorState, setNote, note } = useStatus();
   // const [editorState, setEditorState] = useState(null);
   const [content, setContent] = useState(null);
-  const { socket, note, request } = useStatus();
+  const { socket, request } = useStatus();
   const editorRef = useRef(null);
+  const navigate = useNavigate();
+
   useEffect(() => {
-    if (noteId) {
+    if (url) {
       setContent(new Article());
     }
-  }, [noteId]);
+  }, [url]);
+
   useEffect(() => {
-    console.log('editorState', editorState);
-  }, [editorState]);
-  useEffect(() => {
-    console.log(content);
-    console.log(setEditorState);
     if (content && setEditorState) {
       const setPreview = async () => {
-        let res = await request.getNote(note.id);
-        if (!res.data.note) {
-          setEditorState(EditorState.createEmpty(decorations));
-          return;
-        } else {
-          const rawContent = JSON.parse(res.data.note);
-          if (rawContent) {
-            console.log(rawContent);
-            setEditorState(
-              EditorState.createWithContent(
-                convertFromRaw(rawContent),
-                decorations
-              )
-            );
-            content.setInitalContent(rawContent);
-          } else {
+        let res;
+        try {
+          res = await request.getNote(url);
+          console.log(res.data);
+          setNote((prev) => {
+            return {
+              ...prev,
+              id: res.data.noteId,
+              title: res.data.title,
+              star: res.data.star,
+            };
+          });
+          if (!res.data.latest) {
             setEditorState(EditorState.createEmpty(decorations));
+            return;
+          } else {
+            const rawContent = JSON.parse(res.data.latest);
+            if (rawContent) {
+              setEditorState(
+                EditorState.createWithContent(
+                  convertFromRaw(rawContent),
+                  decorations
+                )
+              );
+              content.setInitalContent(rawContent);
+            } else {
+              setEditorState(EditorState.createEmpty(decorations));
+            }
           }
+        } catch (error) {
+          navigate('/notes/all');
         }
       };
       setPreview();
     }
   }, [content, setEditorState]);
   useEffect(() => {
-    if (socket && editorState && noteId) {
-      debounceLoadData(socket, editorState.getCurrentContent(), noteId);
+    if (socket && editorState && note.id) {
+      debounceLoadData(socket, editorState.getCurrentContent(), note.id);
     }
-  }, [socket, editorState]);
+  }, [socket, editorState, note]);
   // Auto Saving
   const saveContent = (socket, content, noteId) => {
     socket.emit('saveNotes', {

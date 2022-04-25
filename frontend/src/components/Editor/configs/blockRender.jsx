@@ -20,6 +20,10 @@ const blockRenderMap = Immutable.Map({
     element: 'div',
     wrapper: <CodeWrapper delete="true" />,
   },
+  'code-block-correct': {
+    element: 'div',
+    wrapper: <CodeWrapper />,
+  },
 });
 
 function myBlockRenderer(contentBlock) {

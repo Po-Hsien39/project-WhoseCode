@@ -1,13 +1,19 @@
 /* eslint-disable */
 import { useState, useEffect, useRef, Component, Fragment } from 'react';
-import { useStatus } from '../../hook/useStatus';
-import { PrismDraftDecorator } from '../../modules/code-highlight';
+import { PrismDraftDecorator } from '../../../modules/code-highlight';
 import Prism from 'prismjs';
-import { BLOCK_TYPES, styleMap, INLINE_STYLES } from '../../constants/constant';
-import { myBlockRenderer, extendedBlockRenderMap } from './configs/blockRender';
+import {
+  BLOCK_TYPES,
+  styleMap,
+  INLINE_STYLES,
+} from '../../../constants/constant';
+import {
+  myBlockRenderer,
+  extendedBlockRenderMap,
+} from '../configs/blockRender';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import 'prismjs/themes/prism-coy.css';
-import '../../css/Editor.css';
+import '../../../css/Editor.css';
 import _ from 'lodash';
 import { Editor, EditorState, RichUtils, convertFromRaw } from 'draft-js';
 const decorations = new PrismDraftDecorator(Prism.languages.javascript);

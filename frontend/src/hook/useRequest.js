@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 const useRequest = {
-  createNote: async (star) => {
+  createNote: async (note) => {
     return await axios.post(
       process.env.REACT_APP_DOMAIN + '/api/1.0/note',
-      { star },
+      { note },
       {
         headers: {
           authorization: 'Bearer ' + window.localStorage.getItem('token'),
@@ -38,9 +38,14 @@ const useRequest = {
       process.env.REACT_APP_DOMAIN + '/api/1.0/notes/' + userId
     );
   },
-  getNote: async (noteId) => {
+  getNote: async (noteUrl) => {
     return await axios.get(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId
+      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteUrl,
+      {
+        headers: {
+          authorization: 'Bearer ' + window.localStorage.getItem('token'),
+        },
+      }
     );
   },
   addStarToNote: async (noteId, star) => {
@@ -54,6 +59,43 @@ const useRequest = {
     return await axios.put(
       process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
       { type: 'rollback', version, content }
+    );
+  },
+  getPermission: async (noteId) => {
+    return await axios.get(
+      process.env.REACT_APP_DOMAIN + '/api/1.0/permission/' + noteId,
+      {
+        headers: {
+          authorization: 'Bearer ' + window.localStorage.getItem('token'),
+        },
+      }
+    );
+  },
+  alterPublicPermission: async (noteId, permissionChange) => {
+    return await axios.put(
+      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      {
+        type: 'permission',
+        permission: { ...permissionChange, type: 'alterPublicPermission' },
+      }
+    );
+  },
+  allowPublicPermission: async (noteId) => {
+    return await axios.put(
+      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      {
+        type: 'permission',
+        permission: { type: 'allowPublic' },
+      }
+    );
+  },
+  denyPublicPermission: async (noteId) => {
+    return await axios.put(
+      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      {
+        type: 'permission',
+        permission: { type: 'denyPublic' },
+      }
     );
   },
   getVersions: async (noteId) => {

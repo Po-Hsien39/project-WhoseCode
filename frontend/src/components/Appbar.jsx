@@ -28,7 +28,7 @@ export default function MyAppBar() {
 
   return (
     <>
-      <Box sx={{ flexGrow: 1, position: 'fixed', top: 0, zIndex: 10 }}>
+      <Box sx={{ flexGrow: 1, position: 'fixed', top: 0 }}>
         <AppBar>
           <Toolbar>
             <ButtonBase>

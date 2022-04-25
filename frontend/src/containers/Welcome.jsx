@@ -2,7 +2,7 @@ import { ReactComponent as MainSvg } from '../assets/taking-notes-animate.svg';
 import Background from '../assets/background.png';
 import BottomBackground from '../assets/background2.png';
 import { Grid, Typography, Button, useTheme } from '@mui/material';
-import { useEffect, Fragment } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStatus } from '../hook/useStatus';
 
@@ -12,7 +12,7 @@ const Welcome = () => {
   const { user } = useStatus();
   useEffect(() => {
     if (user.login) {
-      navigate('/notes');
+      navigate('/notes/all');
     }
   }, [user]);
 
