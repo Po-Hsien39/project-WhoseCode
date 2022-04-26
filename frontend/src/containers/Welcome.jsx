@@ -51,7 +51,7 @@ const Welcome = () => {
           top: '6%',
         }}
       />
-      <Grid container sx={{ paddingTop: '160px' }}>
+      <Grid container sx={{ paddingTop: '12.6%' }}>
         <Grid item xs={12} md={1.5}></Grid>
         <Grid
           item

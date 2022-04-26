@@ -7,7 +7,7 @@ import {
   AvatarGroup,
   Avatar,
 } from '@mui/material';
-// import Animate from './animate';
+import Animate from './animate';
 import { useStatus } from '../../hook/useStatus';
 import { Home as HomeIcon } from '@mui/icons-material';
 import Background from '../../assets/background.png';
@@ -45,14 +45,14 @@ const Board = () => {
           width: '500px',
         }}
       />
-      {/* <Animate /> */}
+      <Animate />
       <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
           marginBottom: '25px',
         }}>
-        <HomeIcon color="secondary" />
+        <HomeIcon color="secondary" fontSize="large" />
         <Typography variant="h5" sx={{ marginLeft: '10px' }}>
           {`${user.name}'s Home`}
         </Typography>
@@ -135,13 +135,13 @@ const Note = ({ note }) => {
               <AccessTimeIcon fontSize="small" />
             </Grid>
             <Grid item xs={12} md={8} sx={{ textAlign: 'start' }}>
-              <Typography variant="h8">{`Created at: ${note.createdAt}`}</Typography>
+              <Typography variant="h8">{`Created at: 7 days ago`}</Typography>
             </Grid>
           </Grid>
           <Grid container sx={{ display: 'flex', alignItems: 'center' }}>
             <Grid item xs={12} md={2}></Grid>
             <Grid item xs={12} md={8} sx={{ textAlign: 'start' }}>
-              <Typography variant="h8">{`Update at: ${note.updatedAt.toString()}`}</Typography>
+              <Typography variant="h8">{`Update at: 22 hours ago`}</Typography>
             </Grid>
           </Grid>
           <Grid container sx={{ marginTop: '20px' }}>

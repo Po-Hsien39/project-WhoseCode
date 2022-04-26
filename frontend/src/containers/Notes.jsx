@@ -194,7 +194,7 @@ export default function PersistentDrawerLeft() {
           position: 'fixed',
           right: 0,
           top: '10px',
-          zIndex: 100,
+          zIndex: 110,
         }}>
         <PopoverPopupState />
         <Tooltip title="View Comments" placement="bottom">
@@ -235,7 +235,11 @@ export default function PersistentDrawerLeft() {
       </Box>
 
       <CssBaseline />
-      <DrawerAppbar position="fixed" open={open} rightopen={rightopen ? 1 : 0}>
+      <DrawerAppbar
+        position="fixed"
+        open={open}
+        rightopen={rightopen ? 1 : 0}
+        sx={{ zIndex: 105 }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -408,7 +412,7 @@ export default function PersistentDrawerLeft() {
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
-            zIndex: '100',
+            zIndex: '120',
             position: 'fixed',
           }}>
           <IconButton

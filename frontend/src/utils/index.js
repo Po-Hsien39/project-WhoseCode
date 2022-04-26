@@ -98,8 +98,10 @@ const backspaceRemoveType = (type) => {
 };
 
 function timeSince(date) {
-  var seconds = Math.floor((new Date() - date) / 1000);
-
+  // Date(date);
+  var seconds = Math.floor((new Date() - Date(date)) / 1000);
+  console.log(date);
+  console.log(seconds);
   var interval = seconds / 31536000;
 
   if (interval > 1) {

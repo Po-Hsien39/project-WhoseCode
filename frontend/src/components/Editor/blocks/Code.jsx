@@ -90,7 +90,8 @@ const CodeWrapper = (props) => {
       sx={{
         position: 'relative',
         marginBottom: '20px',
-        marginTop: '20px',
+        // marginTop: '20px',
+        zIndex: 100,
         // display: props.delete ? 'none' : 'block',
       }}
       onMouseEnter={() => setShowFunc(true)}
