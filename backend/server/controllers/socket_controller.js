@@ -18,8 +18,8 @@ const config = (io) => {
 
     socket.on('saveNotes', async (event) => {
       const { noteId, content } = event;
-      let { version, latest, updateId } = await Note.findOneAndUpdate(
-        { noteId },
+      let { version, latest, updateId } = await Note.findByIdAndUpdate(
+        noteId,
         [
           {
             $set: {

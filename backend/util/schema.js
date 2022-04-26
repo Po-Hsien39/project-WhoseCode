@@ -2,10 +2,7 @@ const mongoose = require('mongoose');
 
 const NoteSchema = new mongoose.Schema(
   {
-    noteId: {
-      type: Number,
-      required: [true, 'Note ID is required'],
-    },
+    _id: { type: Number, required: true },
     updateId: {
       type: Number,
       default: 0,
@@ -21,6 +18,16 @@ const NoteSchema = new mongoose.Schema(
     diff: {
       type: Array,
       default: [],
+    },
+    permission: {
+      type: Object,
+      default: {
+        openToPublic: false,
+        allowEdit: false,
+        allowComment: false,
+        allowDuplicate: false,
+        allowOthers: [],
+      },
     },
   },
   { timestamps: true }

@@ -39,6 +39,7 @@ app.use(
     require('./server/routes/user_route'),
     require('./server/routes/note_route'),
     require('./server/routes/version_route'),
+    require('./server/routes/permission_route'),
   ]
 );
 server.listen(PORT, async () => {

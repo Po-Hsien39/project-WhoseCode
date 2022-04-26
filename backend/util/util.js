@@ -17,15 +17,12 @@ const createNewVersion = async (noteId, version, latest) => {
 };
 
 const saveDiff = async (diff, noteId, latest) => {
-  await Note.findOneAndUpdate(
-    { noteId },
-    {
-      version: latest,
-      $push: {
-        diff: { diff: JSON.stringify(diff), date: new Date() },
-      },
-    }
-  );
+  await Note.findByIdAndUpdate(noteId, {
+    version: latest,
+    $push: {
+      diff: { diff: JSON.stringify(diff), date: new Date() },
+    },
+  });
 };
 
 const getOlderVersion = (diff, version, versionId) => {

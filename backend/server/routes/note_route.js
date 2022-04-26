@@ -16,5 +16,8 @@ router
   .delete(wrapAsync(deleteNote));
 
 router.route('/notes/:id').get(wrapAsync(getAllNotes));
-router.route('/note/:id').get(wrapAsync(getNote)).put(wrapAsync(modifyNote));
+router
+  .route('/note/:id')
+  .get(authentication(), wrapAsync(getNote))
+  .put(wrapAsync(modifyNote));
 module.exports = router;
