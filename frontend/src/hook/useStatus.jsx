@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import React from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import Request from './useRequest';
@@ -75,16 +76,19 @@ const StatusProvider = (props) => {
   const [editorState, setEditorState] = useState(null);
 
   useEffect(() => {
-    const socket = io(process.env.REACT_APP_SOCKET_URL);
+    const socket = io(import.meta.env.VITE_APP_SOCKET_URL);
     setSocket(socket);
   }, []);
+
   useEffect(() => {
     const getProfileData = async () => {
       const access_token = window.localStorage.getItem('token');
       if (!access_token) return;
       let res = await axios.get(
-        process.env.REACT_APP_DOMAIN + '/api/1.0/user',
-        { headers: { authorization: 'Bearer ' + access_token } }
+        import.meta.env.VITE_APP_DOMAIN + '/api/1.0/user',
+        {
+          headers: { authorization: 'Bearer ' + access_token },
+        }
       );
       const { data } = res.data;
       setUser({

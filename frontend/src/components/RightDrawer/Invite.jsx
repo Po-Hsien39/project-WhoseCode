@@ -43,7 +43,7 @@ const Invite = () => {
             }}
             onClick={() => {
               navigator.clipboard.writeText(
-                `${process.env.REACT_APP_DOMAIN}/notes/${note.url}`
+                `${import.meta.env.VITE_APP_DOMAIN}/notes/${note.url}`
               );
               showMessage('Copied to clipboard');
             }}>

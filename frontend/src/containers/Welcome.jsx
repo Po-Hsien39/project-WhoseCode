@@ -1,4 +1,4 @@
-import { ReactComponent as MainSvg } from '../assets/taking-notes-animate.svg';
+// import { ReactComponent as MainSvg } from '../assets/taking-notes-animate.svg';
 import Background from '../assets/background.png';
 import BottomBackground from '../assets/background2.png';
 import { Grid, Typography, Button, useTheme } from '@mui/material';
@@ -43,14 +43,14 @@ const Welcome = () => {
           width: '500px',
         }}
       />
-      <MainSvg
+      {/* <MainSvg
         style={{
           width: '400px',
           position: 'absolute',
           right: '15%',
           top: '6%',
         }}
-      />
+      /> */}
       <Grid container sx={{ paddingTop: '12.6%' }}>
         <Grid item xs={12} md={1.5}></Grid>
         <Grid

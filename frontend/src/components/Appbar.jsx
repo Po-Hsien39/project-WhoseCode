@@ -6,8 +6,6 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
-import Stack from '@mui/material/Stack';
 import { ButtonBase, Avatar } from '@mui/material/';
 import { useStatus } from '../hook/useStatus';
 

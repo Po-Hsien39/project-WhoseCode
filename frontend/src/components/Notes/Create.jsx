@@ -29,8 +29,6 @@ const Create = ({ open, setOpen, page, setPage }) => {
       setSlideIn(true);
     } else {
       // setSlideDirection('right');
-      console.log('?????????????????');
-      console.log(page.type === 'next' ? 'right' : 'left');
       setSlideDirection(page.type === 'next' ? 'right' : 'left');
       setSlideIn(false);
       setTimeout(() => {

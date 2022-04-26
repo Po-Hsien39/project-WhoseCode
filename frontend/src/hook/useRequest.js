@@ -3,7 +3,7 @@ import axios from 'axios';
 const useRequest = {
   createNote: async (note) => {
     return await axios.post(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/note',
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note',
       { note },
       {
         headers: {
@@ -14,7 +14,7 @@ const useRequest = {
   },
   nativeSignIn: async (email, password) => {
     return await axios.post(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/user/signin',
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/user/signin',
       {
         email: email,
         password: password,
@@ -24,7 +24,7 @@ const useRequest = {
   },
   signUp: async (name, email, password) => {
     return await axios.post(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/user/signup',
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/user/signup',
       {
         name: name,
         email: email,
@@ -35,12 +35,12 @@ const useRequest = {
   },
   getAllNotes: async (userId) => {
     return await axios.get(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/notes/' + userId
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/notes/' + userId
     );
   },
   getNote: async (noteUrl) => {
     return await axios.get(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteUrl,
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteUrl,
       {
         headers: {
           authorization: 'Bearer ' + window.localStorage.getItem('token'),
@@ -50,20 +50,20 @@ const useRequest = {
   },
   addStarToNote: async (noteId, star) => {
     return await axios.put(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
       { star, type: 'star' }
     );
   },
   rollBackNote: async (noteId, version, content) => {
     console.log(noteId, version, content);
     return await axios.put(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
       { type: 'rollback', version, content }
     );
   },
   getPermission: async (noteId) => {
     return await axios.get(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/permission/' + noteId,
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/permission/' + noteId,
       {
         headers: {
           authorization: 'Bearer ' + window.localStorage.getItem('token'),
@@ -73,7 +73,7 @@ const useRequest = {
   },
   alterPublicPermission: async (noteId, permissionChange) => {
     return await axios.put(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
       {
         type: 'permission',
         permission: { ...permissionChange, type: 'alterPublicPermission' },
@@ -82,7 +82,7 @@ const useRequest = {
   },
   allowPublicPermission: async (noteId) => {
     return await axios.put(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
       {
         type: 'permission',
         permission: { type: 'allowPublic' },
@@ -91,7 +91,7 @@ const useRequest = {
   },
   denyPublicPermission: async (noteId) => {
     return await axios.put(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
       {
         type: 'permission',
         permission: { type: 'denyPublic' },
@@ -100,12 +100,12 @@ const useRequest = {
   },
   getVersions: async (noteId) => {
     return await axios.get(
-      process.env.REACT_APP_DOMAIN + '/api/1.0/versions/' + noteId
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/versions/' + noteId
     );
   },
   getVersion: async (noteId, versionId) => {
     return await axios.get(
-      process.env.REACT_APP_DOMAIN +
+      import.meta.env.VITE_APP_DOMAIN +
         '/api/1.0/version/' +
         noteId +
         '/' +
