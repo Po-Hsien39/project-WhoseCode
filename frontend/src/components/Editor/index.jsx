@@ -47,7 +47,6 @@ const DraftJSRichTextEditor = ({ url }) => {
   const [content, setContent] = useState(null);
   const { socket, request } = useStatus();
   const editorRef = useRef(null);
-  const navigate = useNavigate();
   useEffect(() => {
     console.log(readOnly);
   }, [readOnly]);
@@ -134,9 +133,7 @@ const DraftJSRichTextEditor = ({ url }) => {
   }, [socket, editorState, note]);
 
   useEffect(() => {
-    console.log('!!!!!!!!!!!!');
     if (socket && content && note.id) {
-      console.log('134134134');
       socket.emit('changeRoom', note.id);
       function handleEvent(event) {
         setEditorState((editorState) => {
@@ -172,6 +169,12 @@ const DraftJSRichTextEditor = ({ url }) => {
   };
 
   const onChange = (editorState) => {
+    console.log(editorState);
+    console.log(editorState.getSelection());
+    if (!editorState.getSelection().getHasFocus()) {
+      setEditorState(editorState);
+      return;
+    }
     const startBlockKey = editorState.getSelection().getStartKey();
     const endBlockKey = editorState.getSelection().getEndKey();
     const startBlockIndex = editorState
@@ -640,7 +643,7 @@ const DraftJSRichTextEditor = ({ url }) => {
   };
 
   const focus = () => {
-    editorRef.current.focus();
+    // editorRef.current.focus();
   };
 
   return (
@@ -658,19 +661,19 @@ const DraftJSRichTextEditor = ({ url }) => {
           <div className={'RichEditor-editor'} onClick={focus}>
             <Editor
               readOnly={readOnly}
-              blockStyleFn={getBlockStyle}
-              customStyleMap={styleMap}
+              // blockStyleFn={getBlockStyle}
+              // customStyleMap={styleMap}
               editorState={editorState}
-              handleKeyCommand={handleKeyCommand}
+              // handleKeyCommand={handleKeyCommand}
               onChange={onChange}
-              onTab={onTab}
-              keyBindingFn={keyBindingFn}
-              handlePastedText={handlePastedText}
-              blockRenderMap={extendedBlockRenderMap}
-              blockRendererFn={myBlockRenderer}
+              // onTab={onTab}
+              // keyBindingFn={keyBindingFn}
+              // handlePastedText={handlePastedText}
+              // blockRenderMap={extendedBlockRenderMap}
+              // blockRendererFn={myBlockRenderer}
               // placeholder="Tell a story..."
               ref={editorRef}
-              spellCheck={true}
+              // spellCheck={true}
             />
           </div>
         </div>
