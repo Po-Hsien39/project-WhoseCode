@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "0.0.19",
+  "version": "0.0.21",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.7.0",
@@ -51,5 +51,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@honkhonk/vite-plugin-svgr": "^1.1.0"
   }
 }

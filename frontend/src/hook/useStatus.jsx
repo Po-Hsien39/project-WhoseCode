@@ -3,6 +3,8 @@ import React from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import Request from './useRequest';
+import { useNavigate, useLocation } from 'react-router-dom';
+
 const StatusContext = createContext({
   user: {},
   setUser: () => {},
@@ -20,6 +22,10 @@ const StatusContext = createContext({
   createNoteDetails: {},
   setCreateNoteDetails: () => {},
   setDefaultCreate: () => {},
+  redirectUrl: '',
+  setRedirectUrl: () => {},
+  otherNotesPermission: {},
+  setOtherNotesPermission: () => {},
 });
 
 const defaultPermission = {
@@ -34,6 +40,7 @@ const defaultPermission = {
 };
 
 const StatusProvider = (props) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState({
     id: '',
     name: '',
@@ -45,9 +52,7 @@ const StatusProvider = (props) => {
     setCreateNoteDetails(defaultPermission);
   };
   const [notes, setNotes] = useState({ private: [], collect: [], delete: [] });
-  useEffect(() => {
-    console.log(notes);
-  }, [notes]);
+
   const [versionNote, setVersionNote] = useState({
     id: '',
     version: '',
@@ -74,16 +79,35 @@ const StatusProvider = (props) => {
   const [request, setRequest] = useState(Request);
   const [socket, setSocket] = useState(null);
   const [editorState, setEditorState] = useState(null);
+  const [redirectUrl, setRedirectUrl] = useState('');
+  const [otherNotesPermission, setOtherNotesPermission] = useState({
+    status: false,
+    blocked: false,
+    blockedType: '',
+    othersPermission: {
+      allowEdit: false,
+      allowComment: false,
+      allowDuplicate: false,
+    },
+  });
 
   useEffect(() => {
     const socket = io(import.meta.env.VITE_APP_SOCKET_URL);
     setSocket(socket);
   }, []);
 
+  const location = useLocation();
   useEffect(() => {
     const getProfileData = async () => {
       const access_token = window.localStorage.getItem('token');
-      if (!access_token) return;
+      console.log(access_token);
+      if (!access_token) {
+        setRedirectUrl(location);
+        if (location.pathname !== '/') {
+          navigate('/login');
+        }
+        return;
+      }
       let res = await axios.get(
         import.meta.env.VITE_APP_DOMAIN + '/api/1.0/user',
         {
@@ -123,6 +147,10 @@ const StatusProvider = (props) => {
         createNoteDetails,
         setCreateNoteDetails,
         setDefaultCreate,
+        redirectUrl,
+        setRedirectUrl,
+        otherNotesPermission,
+        setOtherNotesPermission,
       }}
       {...props}
     />

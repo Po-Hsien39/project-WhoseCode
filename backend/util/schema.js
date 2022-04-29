@@ -29,10 +29,22 @@ const NoteSchema = new mongoose.Schema(
         allowOthers: [],
       },
     },
+    comments: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', default: [] },
+    ],
+  },
+  { timestamps: true }
+);
+
+const CommentSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    comment: { type: String, required: true },
   },
   { timestamps: true }
 );
 
 const Note = mongoose.model('Note', NoteSchema);
+const Comment = mongoose.model('Comment', CommentSchema);
 
-module.exports = { Note };
+module.exports = { Note, Comment };

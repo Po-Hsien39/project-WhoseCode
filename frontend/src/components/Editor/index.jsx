@@ -34,14 +34,23 @@ import {
   getDefaultKeyBinding,
 } from 'draft-js';
 const decorations = new PrismDraftDecorator(Prism.languages.javascript);
-const DraftJSRichTextEditor = ({ url, readOnly }) => {
-  const { editorState, setEditorState, setNote, note } = useStatus();
+const DraftJSRichTextEditor = ({ url }) => {
+  const {
+    editorState,
+    setEditorState,
+    setNote,
+    note,
+    setOtherNotesPermission,
+  } = useStatus();
   // const [editorState, setEditorState] = useState(null);
+  const [readOnly, setReadOnly] = useState(false);
   const [content, setContent] = useState(null);
   const { socket, request } = useStatus();
   const editorRef = useRef(null);
   const navigate = useNavigate();
-
+  useEffect(() => {
+    console.log(readOnly);
+  }, [readOnly]);
   useEffect(() => {
     if (url) {
       setContent(new Article());
@@ -49,12 +58,27 @@ const DraftJSRichTextEditor = ({ url, readOnly }) => {
   }, [url]);
 
   useEffect(() => {
-    if (content && setEditorState) {
+    if (content && setEditorState && setOtherNotesPermission) {
+      setOtherNotesPermission((prev) => ({ ...prev, status: false }));
       const setPreview = async () => {
         let res;
         try {
           res = await request.getNote(url);
-          console.log(res.data);
+          setReadOnly(false);
+          console.log('???????');
+          if (res.data.permission) {
+            const { allowComment, allowEdit, allowDuplicate } =
+              res.data.permission;
+            setOtherNotesPermission((prev) => ({
+              ...prev,
+              status: true,
+              permission: { allowComment, allowEdit, allowDuplicate },
+            }));
+            if (!allowEdit) {
+              console.log('read only');
+              setReadOnly(true);
+            }
+          }
           setNote((prev) => {
             return {
               ...prev,
@@ -81,31 +105,41 @@ const DraftJSRichTextEditor = ({ url, readOnly }) => {
             }
           }
         } catch (error) {
-          navigate('/notes/all');
+          console.log(error.response.status);
+          if (error.response.status === 401) {
+            setOtherNotesPermission((prev) => ({
+              ...prev,
+              status: true,
+              blocked: true,
+              blockedType: 'denied',
+            }));
+          } else if (error.response.status === 404) {
+            setOtherNotesPermission((prev) => ({
+              ...prev,
+              status: true,
+              blocked: true,
+              blockedType: 'notfound',
+            }));
+          }
         }
       };
       setPreview();
     }
-  }, [content, setEditorState]);
+  }, [content, setEditorState, setOtherNotesPermission]);
+
   useEffect(() => {
     if (socket && editorState && note.id) {
       debounceLoadData(socket, editorState.getCurrentContent(), note.id);
     }
   }, [socket, editorState, note]);
-  // Auto Saving
-  const saveContent = (socket, content, noteId) => {
-    socket.emit('saveNotes', {
-      content: JSON.stringify(convertToRaw(content)),
-      noteId: noteId,
-    });
-  };
-  const debounceLoadData = useCallback(_.debounce(saveContent, 3000), []);
+
   useEffect(() => {
-    if (socket && content) {
-      socket.emit('joinRoom');
+    console.log('!!!!!!!!!!!!');
+    if (socket && content && note.id) {
+      console.log('134134134');
+      socket.emit('changeRoom', note.id);
       function handleEvent(event) {
         setEditorState((editorState) => {
-          console.log(content);
           return eventHandle(editorState, event, content);
         });
       }
@@ -114,7 +148,17 @@ const DraftJSRichTextEditor = ({ url, readOnly }) => {
         socket.off('newEvent', handleEvent);
       };
     }
-  }, [socket, content]);
+  }, [socket, content, note.id]);
+
+  // Auto Saving
+  const saveContent = (socket, content, noteId) => {
+    socket.emit('saveNotes', {
+      content: JSON.stringify(convertToRaw(content)),
+      noteId: noteId,
+    });
+  };
+  const debounceLoadData = useCallback(_.debounce(saveContent, 3000), []);
+
   const createNewBlock = (blocks, block, type = 'unstyled') => {
     let newBlock = new ContentBlock({
       key: genKey(),
@@ -152,6 +196,7 @@ const DraftJSRichTextEditor = ({ url, readOnly }) => {
         newRaws.blocks[startBlockIndex].type;
       setEditorState(editorState);
       socket.emit('editEvent', {
+        id: note.id,
         style: content.getBlock(startBlockIndex).style,
         type: 'changeStyle',
         block: content.getBlock(startBlockIndex).uId,
@@ -237,6 +282,7 @@ const DraftJSRichTextEditor = ({ url, readOnly }) => {
       // Selection means only default operation needs to be send
       if (handled && selection) {
         socket.emit('editEvent', {
+          id: note.id,
           ...socketEvent,
           stopHandleCursor: !requiredChange,
         });
@@ -317,6 +363,7 @@ const DraftJSRichTextEditor = ({ url, readOnly }) => {
           false
         );
         socket.emit('editEvent', {
+          id: note.id,
           type: 'removeBlocks',
           target: removeBlocks,
           block: content.rowNumToId(startBlockIndex),
@@ -352,6 +399,7 @@ const DraftJSRichTextEditor = ({ url, readOnly }) => {
         false
       );
       socket.emit('editEvent', {
+        id: note.id,
         type: 'createBlock',
         target: { uId: newId },
         block: content.rowNumToId(startBlockIndex),
@@ -392,6 +440,7 @@ const DraftJSRichTextEditor = ({ url, readOnly }) => {
         false
       );
       socket.emit('editEvent', {
+        id: note.id,
         type: 'removeBlock',
         insertType: insertKeys.type,
         insertBlock: insertKeys.block,
@@ -531,6 +580,7 @@ const DraftJSRichTextEditor = ({ url, readOnly }) => {
       );
     }
     socket.emit('editEvent', {
+      id: note.id,
       type: 'createBlocks',
       blocksContent: createdBlocks,
       cursor: startIndex,

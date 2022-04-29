@@ -40,6 +40,7 @@ app.use(
     require('./server/routes/note_route'),
     require('./server/routes/version_route'),
     require('./server/routes/permission_route'),
+    require('./server/routes/comment_route'),
   ]
 );
 server.listen(PORT, async () => {

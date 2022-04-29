@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { injectHtml } from 'vite-plugin-html';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import svgr from '@honkhonk/vite-plugin-svgr';
 
 export default defineConfig({
   plugins: [
@@ -18,6 +19,7 @@ export default defineConfig({
         },
       },
     }),
+    svgr(),
   ],
 
   //  webpack.alias -> resolve.alias

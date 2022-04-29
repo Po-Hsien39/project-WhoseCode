@@ -11,12 +11,18 @@ const getAllNotes = async (req, res) => {
 const getNote = async (req, res) => {
   const { id: noteUrl } = req.params;
   if (!noteUrl) return res.status(400).send('noteUrl is required');
-  const { latest, title, noteId, star } = await Note.getNote(
+  const { latest, title, noteId, star, error, permission } = await Note.getNote(
     noteUrl,
     req.user.id
   );
-  if (!noteId) return res.status(400).send('note not found');
-  res.json({ status: 'success', noteId, latest, title, star });
+  console.log(error);
+  if (error === 'NOT_FOUND')
+    return res.status(404).send({ status: 'NOT_FOUND', error });
+  else if (error === 'PERMISSION_DENIED')
+    return res
+      .status(401)
+      .send({ status: 'fail', message: 'Permission Denied' });
+  res.json({ status: 'success', noteId, latest, title, star, permission });
 };
 
 const createNote = async (req, res) => {

@@ -9,6 +9,7 @@ const Main = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/notes/:id" element={<Notes />}></Route>
       <Route path="/" element={<Welcome />}></Route>
+      <Route path="*" element={<Welcome />}></Route>
     </Routes>
   );
 };

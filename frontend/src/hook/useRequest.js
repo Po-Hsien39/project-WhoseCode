@@ -112,6 +112,22 @@ const useRequest = {
         versionId
     );
   },
+  createComment: async (noteId, comment) => {
+    return await axios.post(
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/comment/' + noteId,
+      { comment },
+      {
+        headers: {
+          authorization: 'Bearer ' + window.localStorage.getItem('token'),
+        },
+      }
+    );
+  },
+  getComments: async (noteId) => {
+    return await axios.get(
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/comments/' + noteId
+    );
+  },
 };
 
 export default useRequest;

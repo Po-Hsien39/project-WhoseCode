@@ -1,5 +1,4 @@
 import './App.css';
-import { BrowserRouter as Router } from 'react-router-dom';
 import { useSnackbar } from './hook/useSnackbar';
 import { Snackbar, Alert } from '@mui/material';
 import Main from './containers/Main';
@@ -14,28 +13,26 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Router>
-        {user.login ? null : <Appbar />}
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
-          open={snackbarOption.open}
-          autoHideDuration={snackbarOption.duration}
-          onClose={handleCloseSnackbar}>
-          <Alert
-            // color="primary"
-            // sx={{ color: "secondary" }}
-            elevation={6}
-            variant="filled"
-            onClose={handleCloseSnackbar}
-            severity={snackbarOption.severity}>
-            {snackbarOption.message}
-          </Alert>
-        </Snackbar>
-        <Main />
-      </Router>
+      {user.login ? null : <Appbar />}
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        open={snackbarOption.open}
+        autoHideDuration={snackbarOption.duration}
+        onClose={handleCloseSnackbar}>
+        <Alert
+          // color="primary"
+          // sx={{ color: "secondary" }}
+          elevation={6}
+          variant="filled"
+          onClose={handleCloseSnackbar}
+          severity={snackbarOption.severity}>
+          {snackbarOption.message}
+        </Alert>
+      </Snackbar>
+      <Main />
     </ThemeProvider>
   );
 }

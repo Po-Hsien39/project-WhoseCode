@@ -35,6 +35,7 @@ import DrawerAppbar from '../components/DrawerAppbar';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import PopoverPopupState from '../components/RightDrawer/Share';
 import Create from '../components/Notes/Create';
+import Error from '../components/Notes/Error';
 const drawerWidth = 240;
 const drawerRight = 400;
 
@@ -86,6 +87,7 @@ export default function PersistentDrawerLeft() {
     versionNote,
     setVersionNote,
     setDefaultCreate,
+    otherNotesPermission,
   } = useStatus();
   const theme = useTheme();
   const [open, setOpen] = useState(true);
@@ -94,11 +96,18 @@ export default function PersistentDrawerLeft() {
   const [createModal, setCreateModal] = useState(false);
   const { id: currentUrl } = useParams();
   const [createPage, setCreatePage] = useState({ page: 1, type: 'next' });
+
   // Get User Notes
   useEffect(() => {
     if (user.id) {
+      console.log(user);
       const fetchNotes = async () => {
         const res = await request.getAllNotes(user.id);
+        console.log(res.data.notes);
+        res.data.notes = res.data.notes.sort(
+          (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)
+        );
+        console.log(res.data.notes);
         let currentNotes = res.data.notes.reduce((acc, note) => {
           if (note.deleted) {
             acc['delete'] ? acc['delete'].push(note) : (acc['delete'] = [note]);
@@ -114,7 +123,6 @@ export default function PersistentDrawerLeft() {
           return acc;
         }, {});
         console.log('currentNotes', currentNotes);
-        // if
         setNotes(currentNotes);
       };
       fetchNotes();
@@ -166,14 +174,14 @@ export default function PersistentDrawerLeft() {
           if (item.id === note.id) targetNote = item;
           return item.id !== note.id;
         });
-        if (newNotes.private) newNotes.private.push(targetNote);
+        if (newNotes.private) newNotes.private.unshift(targetNote);
         else newNotes.private = [targetNote];
       } else {
         newNotes.private = newNotes.private.filter((item) => {
           if (item.id === note.id) targetNote = item;
           return item.id !== note.id;
         });
-        if (newNotes.collect) newNotes.collect.push(targetNote);
+        if (newNotes.collect) newNotes.collect.unshift(targetNote);
         else newNotes.collect = [targetNote];
       }
       console.log(newNotes);
@@ -207,18 +215,27 @@ export default function PersistentDrawerLeft() {
             <CommentIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="View Version" placement="bottom">
-          <IconButton
-            onClick={() => {
-              console.log(rightDrawerType);
-              if (rightDrawerType === 'version') setRightopen((prev) => !prev);
-              else setRightopen(true);
-              setRightDrawerType('version');
-            }}>
-            <AccessAlarmIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Add to Collection" placement="bottom">
+        {!otherNotesPermission.status ? (
+          <Tooltip title="View Version" placement="bottom">
+            <IconButton
+              onClick={() => {
+                console.log(rightDrawerType);
+                if (rightDrawerType === 'version')
+                  setRightopen((prev) => !prev);
+                else setRightopen(true);
+                setRightDrawerType('version');
+              }}>
+              <AccessAlarmIcon />
+            </IconButton>
+          </Tooltip>
+        ) : null}
+        <Tooltip
+          title={
+            !otherNotesPermission.status
+              ? 'Add to Collection'
+              : 'Send star to the author'
+          }
+          placement="bottom">
           <IconButton onClick={() => editFavorite()}>
             {!note.star ? (
               <StarBorderIcon />
@@ -263,12 +280,14 @@ export default function PersistentDrawerLeft() {
                 }
                 sx={{ backgroundColor: '#C2C9F2' }}
               />
-              {versionNote.version && (
+              {versionNote.version ||
+              (otherNotesPermission.status &&
+                !otherNotesPermission.permission.allowEdit) ? (
                 <Chip label="Read Only" sx={{ backgroundColor: '#B9D4E1' }} />
-              )}
-              {diffVersion.compare && (
+              ) : null}
+              {diffVersion.compare ? (
                 <Chip label="Show Diff" sx={{ backgroundColor: '#F5FDFF' }} />
-              )}
+              ) : null}
             </Stack>
           )}
         </Toolbar>
@@ -393,7 +412,7 @@ export default function PersistentDrawerLeft() {
       </Drawer>
       <Main open={open} rightopen={rightopen ? 1 : 0}>
         <DrawerHeader />
-        <Editor />
+        {otherNotesPermission.blocked ? <Error /> : <Editor />}
       </Main>
       <Drawer
         sx={{

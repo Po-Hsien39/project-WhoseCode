@@ -69,9 +69,9 @@ const Board = () => {
           position: 'relative',
           zIndex: 100,
         }}>
-        {notes.collect.map((note) => (
-          <Note key={note.id} note={note} />
-        ))}
+        {notes.collect
+          ? notes.collect.map((note) => <Note key={note.id} note={note} />)
+          : null}
       </Box>
       <Typography variant="h6" sx={{ marginTop: '35px' }}>
         Private Notes
@@ -85,9 +85,9 @@ const Board = () => {
           position: 'relative',
           zIndex: 100,
         }}>
-        {notes.private.map((note, i) => (
-          <Note key={note.id} note={note} />
-        ))}
+        {notes.private
+          ? notes.private.map((note, i) => <Note key={note.id} note={note} />)
+          : null}
       </Box>
     </Grid>
   );
@@ -135,13 +135,17 @@ const Note = ({ note }) => {
               <AccessTimeIcon fontSize="small" />
             </Grid>
             <Grid item xs={12} md={8} sx={{ textAlign: 'start' }}>
-              <Typography variant="h8">{`Created at: 7 days ago`}</Typography>
+              <Typography variant="h8">{`Created at: ${timeSince(
+                note.createdAt
+              )}`}</Typography>
             </Grid>
           </Grid>
           <Grid container sx={{ display: 'flex', alignItems: 'center' }}>
             <Grid item xs={12} md={2}></Grid>
             <Grid item xs={12} md={8} sx={{ textAlign: 'start' }}>
-              <Typography variant="h8">{`Update at: 22 hours ago`}</Typography>
+              <Typography variant="h8">{`Update at: ${timeSince(
+                note.updatedAt
+              )}`}</Typography>
             </Grid>
           </Grid>
           <Grid container sx={{ marginTop: '20px' }}>

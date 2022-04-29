@@ -3,18 +3,24 @@ const { Note } = require('../../util/schema');
 const { v1: uuidv1 } = require('uuid');
 
 const getNote = async (noteUrl, requireUser) => {
-  let [[{ id: noteId, user_id, title, star }]] = await pool.query(
+  let [[res]] = await pool.query(
     'SELECT id, user_id, title, star FROM notes WHERE url = ?',
     [noteUrl]
   );
+  if (!res) return { error: 'NOT_FOUND' };
+  const { id: noteId, user_id, title, star } = res;
   // The note belongs to the requester
   if (requireUser === user_id) {
     const { latest } = await Note.findById(noteId);
     return { latest, title, noteId, star };
+  } else {
+    let { permission, latest } = await Note.findById(noteId);
+    if (!permission.openToPublic) {
+      return { error: 'PERMISSION_DENIED' };
+    }
+    permission.owner = false;
+    return { latest, title, noteId, star, permission };
   }
-  // Else, the note belongs to someone else, the permission should be checked
-  console.log(noteId, user_id);
-  return noteId;
 };
 
 const getAllNotes = async (user_id) => {

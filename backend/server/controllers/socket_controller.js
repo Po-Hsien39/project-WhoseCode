@@ -5,15 +5,20 @@ const config = (io) => {
   io.on('connection', async (socket) => {
     console.log('a user connected');
 
-    socket.on('joinRoom', () => {
-      console.log('Collaborating Editor');
-      socket.join('testRoom');
+    socket.on('editEvent', (event) => {
+      const { id } = event;
+      socket.to('room' + id).emit('newEvent', event);
     });
 
-    socket.on('editEvent', (event) => {
-      console.log(event);
-      console.log(io.sockets.adapter.rooms);
-      socket.to('testRoom').emit('newEvent', event);
+    socket.on('changeRoom', (noteId) => {
+      console.log(socket.rooms);
+      for (const room of socket.rooms.values()) {
+        if (room !== socket.id) {
+          socket.leave(room);
+        }
+      }
+      socket.join('room' + noteId);
+      socket.emit('joinSuccess', noteId);
     });
 
     socket.on('saveNotes', async (event) => {
@@ -36,8 +41,6 @@ const config = (io) => {
         ],
         { new: true }
       );
-      console.log(updateId);
-      console.log(VERSION_EDIT_TIME);
       if (updateId === -1) {
         createNewVersion(noteId, version, latest);
       }

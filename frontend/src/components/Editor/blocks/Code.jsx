@@ -21,6 +21,7 @@ const CodeWrapper = (props) => {
   const [codeResult, setCodeResult] = useState('');
   const [codeLanguage, setCodeLanguage] = useState('javascript');
   const [copied, setCopied] = useState(false);
+  const [executing, setExecuting] = useState(false);
   const { showMessage } = useSnackbar();
 
   const getCode = async (e) => {
@@ -38,6 +39,7 @@ const CodeWrapper = (props) => {
   };
 
   const execCode = async (e) => {
+    setExecuting(true);
     const codeBlock = await getCode(e);
     console.log(codeBlock);
     let res = await axios.post('http://localhost:3000/api/1.0/code', {
@@ -154,9 +156,22 @@ const CodeWrapper = (props) => {
           props.delete ? 'code-block-hide' : 'public-DraftStyleDefault-pre'
         }
         {...props}></div>
-      <Box className="code-result" contentEditable={false} readOnly>
-        {codeResult}
-      </Box>
+      {executing ? (
+        <Box
+          className="code-result"
+          contentEditable={false}
+          readOnly
+          style={{
+            backgroundColor: '#f2f2f2',
+            marginTop: '5px',
+            padding: '10px',
+            maxHeight: '200px',
+            overflow: 'auto',
+            color: 'black',
+          }}>
+          {codeResult}
+        </Box>
+      ) : null}
     </Box>
   );
 };

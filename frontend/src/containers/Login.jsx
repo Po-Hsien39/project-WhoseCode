@@ -11,7 +11,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [signup, setSignup] = useState(false);
   const [wrongPassword, setWrongPassword] = useState(false);
-  const { user, setUser, request } = useStatus();
+  const { user, setUser, request, redirectUrl } = useStatus();
   const [values, setValues] = useState({
     name: undefined,
     email: undefined,
@@ -60,7 +60,9 @@ const Login = () => {
           login: true,
         });
         showMessage(`Hello ${values.name}~ Happy Noting!`, 'success', 2000);
-        navigate('/');
+        if (redirectUrl && redirectUrl.startsWith('/notes/'))
+          navigate(redirectUrl);
+        else navigate('/');
       } catch (err) {
         console.log(err.code);
         showMessage(err.response.data.error, 'error', 2000);
@@ -82,7 +84,9 @@ const Login = () => {
         login: true,
       });
       showMessage(`Hello ${user.name}~ Happy Noting!`, 'success', 2000);
-      navigate('/');
+      if (redirectUrl && redirectUrl.startsWith('/notes/')) {
+        navigate(redirectUrl);
+      } else navigate('/');
     } catch (err) {
       showMessage('Wrong Email or Password, Please try again', 'error', 2000);
     }

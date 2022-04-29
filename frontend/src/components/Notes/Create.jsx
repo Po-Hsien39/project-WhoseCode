@@ -238,14 +238,14 @@ const Page3 = ({ setPage, setOpen }) => {
         ...notes,
         private: !notes.private
           ? [{ deleted: 0, id: noteId, star: 0, title, url }]
-          : [...notes.private, { deleted: 0, id: noteId, star: 0, title, url }],
+          : [{ deleted: 0, id: noteId, star: 0, title, url }, ...notes.private],
       });
     } else {
       setNotes({
         ...notes,
         collect: !notes.collect
           ? [{ deleted: 0, id: noteId, star: 1, title, url }]
-          : [...notes.collect, { deleted: 0, id: noteId, star: 1, title, url }],
+          : [{ deleted: 0, id: noteId, star: 1, title, url }, ...notes.collect],
       });
     }
     setOpen(false);
