@@ -46,9 +46,7 @@ const textDiff = (oldText, newText, cursorPosition) => {
     } else {
       let variance;
       let cursor;
-      console.log(oldText.getContent());
-      console.log(newText);
-      console.log(cursorPosition);
+
       if (cursorPosition === minSize) {
         cursor = cursorPosition;
         variance = newText.slice(
@@ -62,10 +60,7 @@ const textDiff = (oldText, newText, cursorPosition) => {
           cursorPosition
         );
       }
-      console.log(variance);
-      console.log(oldText.getContent());
-      console.log(newText);
-      console.log(cursor);
+
       let res = Block.getChainFamily(oldText.texts, cursor, 'insert');
 
       let insertMap = [];

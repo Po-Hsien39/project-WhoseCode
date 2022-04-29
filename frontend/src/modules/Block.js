@@ -10,6 +10,7 @@ class Block {
     this.next = null;
     this.isDeleted = false;
     this.uId = uId;
+    this.inGarbage = false;
   }
   insertKey({ prev, target, next, fromOutside }) {
     let currentKey = this.texts;
@@ -113,6 +114,17 @@ class Block {
     return removeCnt;
   }
 
+  clearGarbage() {
+    let current = this.texts.next;
+    while (current.next !== null) {
+      if (current.inGarbage) {
+        current.prev.next = current.next;
+        current.next.prev = current.prev;
+      } else if (current.isDeleted) current.inGarbage = true;
+      current = current.next;
+    }
+  }
+
   showStructure() {
     let structure = [];
     let current = this.texts;
@@ -174,7 +186,15 @@ class Block {
       if (!parentNode.isDeleted) index++;
     }
     if (status === 'insert') {
-      return { prev: parentNode, next: parentNode.next };
+      // Update Part: In order to use garbage collection, it is necessary to check if the text is deleted.
+      let prev = parentNode;
+      parentNode = parentNode.next;
+      while (true) {
+        if (parentNode.isDeleted) {
+          parentNode = parentNode.next;
+        } else break;
+      }
+      return { prev, next: parentNode };
     } else if (status === 'delete') {
       parentNode = parentNode.next;
       while (parentNode.isDeleted) {

@@ -17,7 +17,6 @@ import Prism from 'prismjs';
 import { BLOCK_TYPES, styleMap, INLINE_STYLES } from '../../constants/constant';
 import { myBlockRenderer, extendedBlockRenderMap } from './configs/blockRender';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import 'prismjs/themes/prism-coy.css';
 import '../../css/Editor.css';
 import _ from 'lodash';
@@ -41,18 +40,19 @@ const DraftJSRichTextEditor = ({ url }) => {
     setNote,
     note,
     setOtherNotesPermission,
+    cleanCronTab,
+    setCleanCronTab,
   } = useStatus();
   // const [editorState, setEditorState] = useState(null);
   const [readOnly, setReadOnly] = useState(false);
   const [content, setContent] = useState(null);
   const { socket, request } = useStatus();
   const editorRef = useRef(null);
-  useEffect(() => {
-    console.log(readOnly);
-  }, [readOnly]);
+
   useEffect(() => {
     if (url) {
       setContent(new Article());
+      clearInterval(cleanCronTab);
     }
   }, [url]);
 
@@ -64,7 +64,6 @@ const DraftJSRichTextEditor = ({ url }) => {
         try {
           res = await request.getNote(url);
           setReadOnly(false);
-          console.log('???????');
           if (res.data.permission) {
             const { allowComment, allowEdit, allowDuplicate } =
               res.data.permission;
@@ -99,6 +98,10 @@ const DraftJSRichTextEditor = ({ url }) => {
                 )
               );
               content.setInitalContent(rawContent);
+              let interval = setInterval(() => {
+                content.clearGarbage();
+              }, 15000);
+              setCleanCronTab(interval);
             } else {
               setEditorState(EditorState.createEmpty(decorations));
             }
@@ -169,8 +172,6 @@ const DraftJSRichTextEditor = ({ url }) => {
   };
 
   const onChange = (editorState) => {
-    console.log(editorState);
-    console.log(editorState.getSelection());
     if (!editorState.getSelection().getHasFocus()) {
       setEditorState(editorState);
       return;
@@ -275,6 +276,7 @@ const DraftJSRichTextEditor = ({ url }) => {
       console.log('No status');
       handled = false;
     }
+    console.log(content.showStructure());
     setEditorState((editorState) => {
       let newRaws = convertToRaw(editorState.getCurrentContent());
       newRaws.blocks[blockIndex].text = targetBlock.getContent();
@@ -661,19 +663,19 @@ const DraftJSRichTextEditor = ({ url }) => {
           <div className={'RichEditor-editor'} onClick={focus}>
             <Editor
               readOnly={readOnly}
-              // blockStyleFn={getBlockStyle}
-              // customStyleMap={styleMap}
+              blockStyleFn={getBlockStyle}
+              customStyleMap={styleMap}
               editorState={editorState}
-              // handleKeyCommand={handleKeyCommand}
+              handleKeyCommand={handleKeyCommand}
               onChange={onChange}
-              // onTab={onTab}
-              // keyBindingFn={keyBindingFn}
-              // handlePastedText={handlePastedText}
-              // blockRenderMap={extendedBlockRenderMap}
-              // blockRendererFn={myBlockRenderer}
+              onTab={onTab}
+              keyBindingFn={keyBindingFn}
+              handlePastedText={handlePastedText}
+              blockRenderMap={extendedBlockRenderMap}
+              blockRendererFn={myBlockRenderer}
               // placeholder="Tell a story..."
               ref={editorRef}
-              // spellCheck={true}
+              spellCheck={true}
             />
           </div>
         </div>

@@ -26,6 +26,8 @@ const StatusContext = createContext({
   setRedirectUrl: () => {},
   otherNotesPermission: {},
   setOtherNotesPermission: () => {},
+  cleanCronTab: null,
+  setCleanCronTab: () => {},
 });
 
 const defaultPermission = {
@@ -79,6 +81,7 @@ const StatusProvider = (props) => {
   const [request, setRequest] = useState(Request);
   const [socket, setSocket] = useState(null);
   const [editorState, setEditorState] = useState(null);
+  const [cleanCronTab, setCleanCronTab] = useState(null);
   const [redirectUrl, setRedirectUrl] = useState('');
   const [otherNotesPermission, setOtherNotesPermission] = useState({
     status: false,
@@ -151,6 +154,8 @@ const StatusProvider = (props) => {
         setRedirectUrl,
         otherNotesPermission,
         setOtherNotesPermission,
+        cleanCronTab,
+        setCleanCronTab,
       }}
       {...props}
     />

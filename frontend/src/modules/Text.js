@@ -7,6 +7,7 @@ class Text {
     this.next = null;
     this.content = word;
     this.isDeleted = false;
+    this.inGarbage = false;
   }
   static compare(textA, textB) {
     if (

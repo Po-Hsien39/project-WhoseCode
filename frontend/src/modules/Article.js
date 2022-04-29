@@ -9,6 +9,22 @@ class Article {
     this.blocks.next.next = new Block(null);
     this.blocks.next.next.prev = this.blocks.next;
   }
+  clearGarbage() {
+    console.log('clearGarbage', new Date());
+    console.log(this.showStructure());
+    let current = this.blocks.next;
+    while (current.uId !== null) {
+      // Throw away deleted blocks
+      if (current.inGarbage) {
+        current.prev.next = current.next;
+        current.next.prev = current.prev;
+      } // Only marked those that should be removed
+      else if (current.isDeleted) current.inGarbage = true;
+      // Check whether there has any text to clean
+      else current.clearGarbage();
+      current = current.next;
+    }
+  }
   blockLength() {
     let length = 0;
     let current = this.blocks;
@@ -22,6 +38,7 @@ class Article {
     let current = this.blocks;
     while (index > -1) {
       current = current.next;
+      // Need to check whether the block is deleted for garbage collection mechanism
       if (!current.isDeleted) index--;
     }
     return current;
@@ -97,7 +114,6 @@ class Article {
     let structure = [];
     let current = this.blocks;
     while (current !== null) {
-      console.log(current);
       structure.push({
         id: current.uId,
         isDeleted: current.isDeleted,
