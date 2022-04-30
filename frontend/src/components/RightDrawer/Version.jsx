@@ -158,7 +158,7 @@ const Version = ({ setCreateModal, setCreatePage }) => {
                           spacing={1}
                           sx={{ alignItems: 'center' }}>
                           <Typography variant="h8">
-                            {'Tristan Edited Untitled'}
+                            {`Tristan Edited ${note.title}`}
                           </Typography>
                         </Stack>
                         <Typography
