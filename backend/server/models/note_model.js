@@ -37,18 +37,30 @@ const getAllNotes = async (user_id) => {
 };
 
 const createNote = async (user_id, note) => {
-  //FIXME: Adding transaction here
-  const { title, star, permission } = note;
-  const url = uuidv1();
-  let [{ insertId: noteId }] = await pool.query(
-    'INSERT INTO notes (user_id, title, star, url) VALUES (?, ?, ?, ?)',
-    [user_id, title, star, url]
-  );
-  await Note.create({
-    _id: noteId,
-    permission: { ...permission, allowOthers: [] },
-  });
-  return { url, noteId, star, title };
+  const conn = await pool.getConnection();
+  try {
+    await conn.query('START TRANSACTION');
+    const { title, star, permission, content } = note;
+    const url = uuidv1();
+    let [{ insertId: noteId }] = await pool.query(
+      'INSERT INTO notes (user_id, title, star, url) VALUES (?, ?, ?, ?)',
+      [user_id, title, star, url]
+    );
+
+    await Note.create({
+      _id: noteId,
+      permission: { ...permission, allowOthers: [] },
+      latest: content ? content : '',
+    });
+
+    await conn.query('COMMIT');
+    return { url, noteId, star, title };
+  } catch (error) {
+    await conn.query('ROLLBACK');
+    return { error };
+  } finally {
+    await conn.release();
+  }
 };
 
 const modifyNote = async (noteId, star) => {

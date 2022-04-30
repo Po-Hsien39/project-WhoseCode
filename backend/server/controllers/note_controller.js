@@ -29,7 +29,8 @@ const createNote = async (req, res) => {
   const { id } = req.user;
   const { note } = req.body;
   if (!id) res.status(400).send('userId is required');
-  const { noteId, url, star, title } = await Note.createNote(id, note);
+  const { noteId, url, star, title, error } = await Note.createNote(id, note);
+  if (error) return res.status(500).send({ status: 'Internal server error' });
   res.send({ status: 'success', noteId, url, star, title });
 };
 

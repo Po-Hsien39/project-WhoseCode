@@ -7,6 +7,7 @@ const config = (io) => {
 
     socket.on('editEvent', (event) => {
       const { id } = event;
+      console.log(event);
       socket.to('room' + id).emit('newEvent', event);
     });
 
@@ -47,9 +48,6 @@ const config = (io) => {
     });
 
     socket.on('disconnect', () => {
-      console.log(socket.id, 'disconnected');
-      console.log(io.sockets.adapter.rooms);
-
       console.log('user disconnected');
     });
     socket.on('join', async (data) => {
