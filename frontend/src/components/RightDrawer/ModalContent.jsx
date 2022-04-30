@@ -6,7 +6,13 @@ import ForkLeftIcon from '@mui/icons-material/ForkLeft';
 import { useStatus } from '../../hook/useStatus';
 import { useSnackbar } from '../../hook/useSnackbar';
 import compareVersion from '../../utils/diff';
-const ModalContent = ({ type, setOpen, setVersions }) => {
+const ModalContent = ({
+  type,
+  setOpen,
+  setVersions,
+  setCreateModal,
+  setCreatePage,
+}) => {
   const [component, setComponent] = useState(null);
   useEffect(() => {
     if (!type) return;
@@ -17,7 +23,13 @@ const ModalContent = ({ type, setOpen, setVersions }) => {
     } else if (type === 'diff') {
       setComponent(<DiffModal setOpen={setOpen} />);
     } else if (type === 'fork') {
-      setComponent(<ForkModal setOpen={setOpen} />);
+      setComponent(
+        <ForkModal
+          setOpen={setOpen}
+          setCreateModal={setCreateModal}
+          setCreatePage={setCreatePage}
+        />
+      );
     }
   }, [type]);
 
@@ -149,7 +161,7 @@ const DiffModal = ({ setOpen }) => {
   );
 };
 
-const ForkModal = ({ setOpen }) => {
+const ForkModal = ({ setOpen, setCreateModal, setCreatePage }) => {
   return (
     <Fragment>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -182,6 +194,8 @@ const ForkModal = ({ setOpen }) => {
           }}
           onClick={() => {
             setOpen(false);
+            setCreateModal(true);
+            setCreatePage({ page: 1, type: 'next' });
           }}>
           OK!
         </Button>

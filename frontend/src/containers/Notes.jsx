@@ -442,7 +442,11 @@ export default function PersistentDrawerLeft() {
             <ArrowForwardIosIcon fontSize="small" size="small" />
           </IconButton>
         </DrawerHeader>
-        <DrawerContent rightDrawerType={rightDrawerType} />
+        <DrawerContent
+          rightDrawerType={rightDrawerType}
+          setCreateModal={setCreateModal}
+          setCreatePage={setCreatePage}
+        />
       </Drawer>
     </Box>
   );

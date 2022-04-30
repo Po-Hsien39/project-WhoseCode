@@ -224,14 +224,26 @@ const Page2 = ({ setPage }) => {
 };
 
 const Page3 = ({ setPage, setOpen }) => {
-  const { createNoteDetails, setCreateNoteDetails, request, notes, setNotes } =
-    useStatus();
+  const {
+    createNoteDetails,
+    setCreateNoteDetails,
+    request,
+    notes,
+    setNotes,
+    setVersionNote,
+    versionNote,
+  } = useStatus();
   const navigate = useNavigate();
 
   const createNote = async () => {
-    let note = await request.createNote(createNoteDetails);
+    let note = await request.createNote({
+      ...createNoteDetails,
+      content: versionNote.id ? versionNote.content : null,
+    });
     let { url, noteId, star, title } = note.data;
     // setNote({ ...note, id: note.data.noteId, star: false });
+    console.log(versionNote.content);
+    setVersionNote({ id: '', version: '', content: '' });
     navigate(`/notes/${url}`);
     if (!star) {
       setNotes({

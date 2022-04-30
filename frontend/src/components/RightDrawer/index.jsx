@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import Version from './Version';
 import Comment from './Comment';
 
-const DrawerContent = ({ rightDrawerType }) => {
+const DrawerContent = ({ rightDrawerType, setCreateModal, setCreatePage }) => {
   const [component, setComponent] = useState(null);
 
   useEffect(() => {
@@ -10,7 +10,12 @@ const DrawerContent = ({ rightDrawerType }) => {
     if (rightDrawerType === 'comment') {
       setComponent(<Comment />);
     } else if (rightDrawerType === 'version') {
-      setComponent(<Version />);
+      setComponent(
+        <Version
+          setCreateModal={setCreateModal}
+          setCreatePage={setCreatePage}
+        />
+      );
     }
   }, [rightDrawerType]);
 

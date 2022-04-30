@@ -18,7 +18,7 @@ import DifferenceIcon from '@mui/icons-material/Difference';
 import ForkLeftIcon from '@mui/icons-material/ForkLeft';
 import ModalContent from './ModalContent';
 
-const Version = () => {
+const Version = ({ setCreateModal, setCreatePage }) => {
   const {
     request,
     note,
@@ -68,6 +68,8 @@ const Version = () => {
             type={modalType}
             setOpen={setOpen}
             setVersions={setVersions}
+            setCreateModal={setCreateModal}
+            setCreatePage={setCreatePage}
           />
         </Box>
       </Modal>
