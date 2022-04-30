@@ -27,7 +27,7 @@ Allows you to create your own notes in your space.
 3. Deletion: Not Removed directly, but marked that the node has been removed
 4. The following is the demo of the structure
 
-<img width="375" alt="image" src="https://user-images.githubusercontent.com/74696199/166089879-2accd439-79a5-46e1-b629-263e4b9b2ee7.png">
+<img width="604" alt="image" src="https://user-images.githubusercontent.com/74696199/166108825-3f7bbfb7-f9b3-4b41-ba9e-c2de7f349388.png">
 
 #### Optimization
 
@@ -37,7 +37,7 @@ Allows you to create your own notes in your space.
 4. New structure as below
 5. In this way, each operation would be O(Ti + M). In most cases, O(N) >> O(Ti + M), It is much faster than before.
 
-<img width="378" alt="image" src="https://user-images.githubusercontent.com/74696199/166090016-61715220-6292-4dad-b676-e622f5b15234.png">
+<img width="602" alt="image" src="https://user-images.githubusercontent.com/74696199/166108947-5e6d62a9-a010-4c9c-bf66-4ebe6a26fe81.png">
 
 #### Garbage Collection
 
@@ -46,7 +46,7 @@ Allows you to create your own notes in your space.
 3. What I do: Use Garbage collector to throw the garbage, follow the [YATA Algorithm essay](https://www.researchgate.net/publication/310212186_Near_Real-Time_Peer-to-Peer_Shared_Editing_on_Extensible_Data_Types) says, not removing it directly, but using a buffer to make sure it won't lead to inconsistency.
 4. Example Below
 
-<img width="639" alt="image" src="https://user-images.githubusercontent.com/74696199/166091686-38c50fcf-9c54-4278-ba5c-4a266bb7503b.png">
+<img width="808" alt="image" src="https://user-images.githubusercontent.com/74696199/166108574-936e5ed3-2f8e-47a1-8fd0-dc941524251d.png">
 
 #### Currently not support
 
@@ -74,4 +74,4 @@ https://user-images.githubusercontent.com/74696199/166094559-03715063-2ba9-4339-
 ### Auto Saving
 
 1. Using debounce technique
-2. Only when user stop editing for 2 seconds will I save the changes of the content
+2. Waits for two seconds of inactivity before saving
