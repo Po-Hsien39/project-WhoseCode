@@ -26,7 +26,8 @@ Allows you to create your own notes in your space.
 2. Insertion: Provide detailed node information(include the prev and the next node at the time of insertion) to make sure it will be appended to the same position
 3. Deletion: Not Removed directly, but marked that the node has been removed
 4. The following is the demo of the structure
-   <img width="375" alt="image" src="https://user-images.githubusercontent.com/74696199/166089879-2accd439-79a5-46e1-b629-263e4b9b2ee7.png">
+
+<img width="375" alt="image" src="https://user-images.githubusercontent.com/74696199/166089879-2accd439-79a5-46e1-b629-263e4b9b2ee7.png">
 
 #### Optimization
 
@@ -35,7 +36,8 @@ Allows you to create your own notes in your space.
 3. What I do: Also put blocks into a doubly linked-list, which can speed up the process
 4. New structure as below
 5. In this way, each operation would be O(Ti + M). In most cases, O(N) >> O(Ti + M), It is much faster than before.
-   <img width="378" alt="image" src="https://user-images.githubusercontent.com/74696199/166090016-61715220-6292-4dad-b676-e622f5b15234.png">
+
+<img width="378" alt="image" src="https://user-images.githubusercontent.com/74696199/166090016-61715220-6292-4dad-b676-e622f5b15234.png">
 
 #### Garbage Collection
 
