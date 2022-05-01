@@ -51,7 +51,9 @@ const EventHandle = (editorState, event, content) => {
     currentId = content.rowNumToId(currentBlockIndex);
   if (event && event.type === 'insert') {
     Text.updateClock(event.target.clock);
+    // console.log(targetBlock.showStructure());
     targetBlock.insertKey({ ...event, fromOutside: true });
+    // console.log(targetBlock.showStructure());
     newRaws.blocks[blockNum].text = targetBlock.getContent();
     newContent = convertFromRaw(newRaws);
   } else if (event && event.type === 'insertMultiple') {
@@ -260,7 +262,7 @@ const EventHandle = (editorState, event, content) => {
       newSelection.anchorOffset -= deleteNum;
       newSelection.focusOffset -= deleteNum;
     } else {
-      console.log('unknown cursor');
+      // console.log('unknown cursor');
     }
   }
   return EditorState.forceSelection(

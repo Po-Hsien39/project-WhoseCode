@@ -20,13 +20,17 @@ class Text {
     return false;
   }
   static correctOrder(textA, textB) {
-    if (textA.clock <= textB.clock || textA.user === textB.user) {
+    if (
+      textA.clock < textB.clock ||
+      (textA.clock === textB.clock && textA.user < textB.user)
+    ) {
       return true;
     }
     return false;
   }
   static updateClock(clock) {
-    Text.clock = Math.max(Text.clock, clock);
+    if (Text.clock >= clock) Text.clock += 1;
+    else Text.clock = clock + 1;
   }
   toString() {
     return { clock: this.clock, user: this.user, content: this.content };

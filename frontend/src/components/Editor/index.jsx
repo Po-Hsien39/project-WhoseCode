@@ -42,6 +42,7 @@ const DraftJSRichTextEditor = ({ url }) => {
     setOtherNotesPermission,
     cleanCronTab,
     setCleanCronTab,
+    user,
   } = useStatus();
   // const [editorState, setEditorState] = useState(null);
   const [readOnly, setReadOnly] = useState(false);
@@ -100,13 +101,14 @@ const DraftJSRichTextEditor = ({ url }) => {
               content.setInitalContent(rawContent);
               let interval = setInterval(() => {
                 content.clearGarbage();
-              }, 15000);
+              }, 30000);
               setCleanCronTab(interval);
             } else {
               setEditorState(EditorState.createEmpty(decorations));
             }
           }
         } catch (error) {
+          console.log(error);
           console.log(error.response.status);
           if (error.response.status === 401) {
             setOtherNotesPermission((prev) => ({
@@ -217,18 +219,14 @@ const DraftJSRichTextEditor = ({ url }) => {
     }
   };
 
-  const handleSingleBlockEditing = (
-    newText,
-    sIndex,
-    blockIndex,
-    selection,
-    requiredChange = true
-  ) => {
-    let targetBlock = content.getBlock(blockIndex);
-    const diff = textDiff(targetBlock, newText, sIndex);
+  const handleDiff = (newText, targetBlock, sIndex) => {
+    let socketEvent = {};
+    console.log(targetBlock.getContent());
+    console.log(newText);
+    const diff = textDiff(targetBlock, newText, sIndex, user.id);
     let rowDiff;
     let handled = true;
-    let socketEvent = {};
+    // let socketEvent = {};
     // Sending Diff to server
     if (diff && diff.type === 'insert') {
       targetBlock.insertKey(diff);
@@ -276,8 +274,37 @@ const DraftJSRichTextEditor = ({ url }) => {
       console.log('No status');
       handled = false;
     }
-    console.log(content.showStructure());
+    return { socketEvent, handled, rowDiff };
+  };
+
+  const handleSingleBlockEditing = (
+    newText,
+    sIndex,
+    blockIndex,
+    selection,
+    requiredChange = true
+  ) => {
+    // console.log(content.showStructure());
+    let socketEvent = {};
+    let handled = true;
+    let targetBlock = content.getBlock(blockIndex);
+    let rowDiff = 0;
+    if (!selection) {
+      let res = handleDiff(newText, targetBlock, sIndex);
+      socketEvent = res.socketEvent;
+      console.log(socketEvent);
+      handled = res.handled;
+      rowDiff = res.rowDiff;
+    }
     setEditorState((editorState) => {
+      if (selection) {
+        let res = handleDiff(newText, targetBlock, sIndex);
+        socketEvent = res.socketEvent;
+        console.log(socketEvent);
+        handled = res.handled;
+        rowDiff = res.rowDiff;
+      }
+
       let newRaws = convertToRaw(editorState.getCurrentContent());
       newRaws.blocks[blockIndex].text = targetBlock.getContent();
       const editor = EditorState.createWithContent(
@@ -286,6 +313,8 @@ const DraftJSRichTextEditor = ({ url }) => {
       );
       // Selection means only default operation needs to be send
       if (handled && selection) {
+        console.log('?????????????????');
+        console.log(socketEvent.target);
         socket.emit('editEvent', {
           id: note.id,
           ...socketEvent,
@@ -650,6 +679,13 @@ const DraftJSRichTextEditor = ({ url }) => {
 
   return (
     <Fragment>
+      <button
+        onClick={() => {
+          console.log(content.showStructure());
+          console.log(content.blocks.next.showStructure());
+        }}>
+        Show Structure
+      </button>
       {editorState ? (
         <div className="RichEditor-root">
           <BlockStyleControls

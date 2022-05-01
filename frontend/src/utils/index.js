@@ -1,7 +1,7 @@
 import Block from '../modules/Block';
 import Text from '../modules/Text';
 
-const textDiff = (oldText, newText, cursorPosition) => {
+const textDiff = (oldText, newText, cursorPosition, userId) => {
   let oldTextLength = oldText.getContent().length;
   let maxSize = Math.max(oldTextLength, newText.length);
   let minSize = Math.min(oldTextLength, newText.length);
@@ -26,7 +26,7 @@ const textDiff = (oldText, newText, cursorPosition) => {
       return {
         ...res,
         cursor,
-        target: new Text('Tristan', newText[cursor]),
+        target: new Text(userId, newText[cursor]),
         type: 'insert',
       };
     }
@@ -65,7 +65,7 @@ const textDiff = (oldText, newText, cursorPosition) => {
 
       let insertMap = [];
       for (let i = 0; i < variance.length; i++) {
-        insertMap.push(new Text('Tristan', variance[i]));
+        insertMap.push(new Text(userId, variance[i]));
       }
       return {
         ...res,

@@ -13,12 +13,16 @@ class Block {
     this.inGarbage = false;
   }
   insertKey({ prev, target, next, fromOutside }) {
+    // console.log(prev, target, next, fromOutside);
+    console.log(target);
     let currentKey = this.texts;
     while (currentKey.next !== null) {
       if (Text.compare(prev, currentKey)) {
+        currentKey = currentKey.next;
         while (true) {
           if (
-            !Text.compare(currentKey.next, next) &&
+            currentKey.next && // At the end of the list
+            !Text.compare(currentKey, next) &&
             !Text.correctOrder(target, currentKey)
           ) {
             currentKey = currentKey.next;
@@ -26,10 +30,10 @@ class Block {
             let newKey = fromOutside
               ? new Text(target.user, target.content, target.clock)
               : target;
-            newKey.next = currentKey.next;
-            currentKey.next.prev = newKey;
-            currentKey.next = newKey;
-            newKey.prev = currentKey;
+            newKey.next = currentKey;
+            newKey.prev = currentKey.prev;
+            newKey.prev.next = newKey;
+            newKey.next.prev = newKey;
             break;
           }
         }
@@ -85,6 +89,8 @@ class Block {
 
   deleteKey({ target }) {
     let currentKey = this.texts;
+    console.log(target);
+    console.log(this.showStructure());
     while (currentKey.next !== null) {
       if (Text.compare(target, currentKey)) {
         currentKey.isDeleted = true;
@@ -133,6 +139,7 @@ class Block {
         clock: current.clock,
         content: current.content,
         isDeleted: current.isDeleted,
+        user: current.user,
       });
       current = current.next;
     }

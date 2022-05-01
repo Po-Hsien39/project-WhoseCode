@@ -10,8 +10,8 @@ class Article {
     this.blocks.next.next.prev = this.blocks.next;
   }
   clearGarbage() {
-    console.log('clearGarbage', new Date());
-    console.log(this.showStructure());
+    // console.log('clearGarbage', new Date());
+    // console.log(this.showStructure());
     let current = this.blocks.next;
     while (current.uId !== null) {
       // Throw away deleted blocks
