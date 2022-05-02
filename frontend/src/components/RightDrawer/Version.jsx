@@ -41,9 +41,7 @@ const Version = ({ setCreateModal, setCreatePage }) => {
     };
     getVersions();
   }, [note]);
-  useEffect(() => {
-    console.log(modalType);
-  }, [modalType]);
+
   const style = {
     position: 'absolute',
     top: '50%',

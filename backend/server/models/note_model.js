@@ -123,8 +123,20 @@ const alterPermission = async (noteId, permission) => {
   }
 };
 
-const deleteNote = async (id) => {
-  await pool.query('DELETE FROM notes WHERE id = ?', [id]);
+const restoreNote = async (id) => {
+  await pool.query('UPDATE notes SET deleted = 0 WHERE id = ?', [id]);
+};
+
+const deleteNote = async (id, deletePermanent) => {
+  console.log(deletePermanent);
+  if (!deletePermanent)
+    await pool.query('UPDATE notes SET deleted = 1, star = 0 WHERE id = ?', [
+      id,
+    ]);
+  else {
+    await pool.query('DELETE FROM notes WHERE id = ?', [id]);
+    await Note.findByIdAndDelete(id);
+  }
 };
 
 module.exports = {
@@ -135,4 +147,5 @@ module.exports = {
   modifyNote,
   rollBackNote,
   alterPermission,
+  restoreNote,
 };

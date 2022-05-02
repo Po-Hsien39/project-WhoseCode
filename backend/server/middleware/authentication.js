@@ -3,7 +3,9 @@ const { TOKEN_SECRET } = process.env;
 
 const authentication = () => {
   return async function (req, res, next) {
+    console.log(req.headers);
     let accessToken = req.get('Authorization');
+    console.log(accessToken);
     if (!accessToken) return res.status(401).send({ error: 'Unauthorized' });
 
     accessToken = accessToken.replace('Bearer ', '');

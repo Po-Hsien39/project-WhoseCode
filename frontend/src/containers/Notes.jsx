@@ -412,7 +412,11 @@ export default function PersistentDrawerLeft() {
       </Drawer>
       <Main open={open} rightopen={rightopen ? 1 : 0}>
         <DrawerHeader />
-        {otherNotesPermission.blocked ? <Error /> : <Editor />}
+        {otherNotesPermission.blocked ? (
+          <Error />
+        ) : (
+          <Editor createNote={createNote} />
+        )}
       </Main>
       <Drawer
         sx={{

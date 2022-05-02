@@ -4,13 +4,13 @@ import DemoTemplate from '../components/Editor/templates/demo-template';
 import { Fragment } from 'react';
 import { useStatus } from '../hook/useStatus';
 import Board from '../components/Board';
-import { Grid } from '@mui/material';
+import { Grid, Box } from '@mui/material';
 
-const EditorContainer = () => {
+const EditorContainer = ({ createNote }) => {
   const { note, versionNote, diffVersion } = useStatus();
 
   return (
-    <Fragment>
+    <Box sx={{ height: '100%' }}>
       {diffVersion.compare ? (
         <Fragment>
           <Grid container sx={{ display: 'flex', width: '100%' }}>
@@ -36,9 +36,9 @@ const EditorContainer = () => {
       ) : note.url ? (
         <Editor noteId={note.id} url={note.url} />
       ) : (
-        <Board />
+        <Board createNote={createNote} />
       )}
-    </Fragment>
+    </Box>
   );
 };
 

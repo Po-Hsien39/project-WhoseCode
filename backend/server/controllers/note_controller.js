@@ -46,13 +46,16 @@ const modifyNote = async (req, res) => {
     await Note.rollBackNote(noteId, version, content);
   } else if (type === 'permission') {
     await Note.alterPermission(noteId, permission);
+  } else if (type === 'restore') {
+    await Note.restoreNote(noteId);
   }
   res.send({ status: 'success' });
 };
 
 const deleteNote = async (req, res) => {
-  const { id: noteId } = req.body;
-  await Note.deleteNote(noteId);
+  const { id: noteId } = req.params;
+  const { deletePermanent } = req.body;
+  await Note.deleteNote(noteId, deletePermanent);
   res.send({ status: 'success' });
 };
 

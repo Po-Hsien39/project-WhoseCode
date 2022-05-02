@@ -40,12 +40,13 @@ const DraftJSRichTextEditor = ({ url }) => {
     setNote,
     note,
     setOtherNotesPermission,
+    otherNotesPermission,
     cleanCronTab,
     setCleanCronTab,
     user,
   } = useStatus();
   // const [editorState, setEditorState] = useState(null);
-  const [readOnly, setReadOnly] = useState(false);
+  const [readOnly, setReadOnly] = useState(true);
   const [content, setContent] = useState(null);
   const { socket, request } = useStatus();
   const editorRef = useRef(null);
@@ -64,7 +65,6 @@ const DraftJSRichTextEditor = ({ url }) => {
         let res;
         try {
           res = await request.getNote(url);
-          setReadOnly(false);
           if (res.data.permission) {
             const { allowComment, allowEdit, allowDuplicate } =
               res.data.permission;
@@ -73,11 +73,7 @@ const DraftJSRichTextEditor = ({ url }) => {
               status: true,
               permission: { allowComment, allowEdit, allowDuplicate },
             }));
-            if (!allowEdit) {
-              console.log('read only');
-              setReadOnly(true);
-            }
-          }
+          } else setReadOnly(false);
           setNote((prev) => {
             return {
               ...prev,
@@ -138,19 +134,35 @@ const DraftJSRichTextEditor = ({ url }) => {
   }, [socket, editorState, note]);
 
   useEffect(() => {
-    if (socket && content && note.id) {
-      socket.emit('changeRoom', note.id);
+    if (socket && note.id) {
+      socket.emit('changeRoom', {
+        noteId: note.id,
+        allowEdit:
+          !otherNotesPermission.status ||
+          otherNotesPermission.permission.allowEdit,
+      });
+    }
+  }, [socket, note.id, otherNotesPermission.status]);
+
+  useEffect(() => {
+    if (socket && content) {
       function handleEvent(event) {
         setEditorState((editorState) => {
           return eventHandle(editorState, event, content);
         });
       }
+      function reset() {
+        setEditorState(null);
+        setContent(new Article());
+      }
       socket.on('newEvent', handleEvent);
+      socket.on('reset', reset);
       return () => {
         socket.off('newEvent', handleEvent);
+        socket.off('reset', reset);
       };
     }
-  }, [socket, content, note.id]);
+  }, [socket, content]);
 
   // Auto Saving
   const saveContent = (socket, content, noteId) => {
@@ -159,7 +171,7 @@ const DraftJSRichTextEditor = ({ url }) => {
       noteId: noteId,
     });
   };
-  const debounceLoadData = useCallback(_.debounce(saveContent, 3000), []);
+  const debounceLoadData = useCallback(_.debounce(saveContent, 1000), []);
 
   const createNewBlock = (blocks, block, type = 'unstyled') => {
     let newBlock = new ContentBlock({
@@ -696,7 +708,10 @@ const DraftJSRichTextEditor = ({ url }) => {
             editorState={editorState}
             onToggle={toggleInlineStyle}
           />
-          <div className={'RichEditor-editor'} onClick={focus}>
+          <div
+            className={'RichEditor-editor'}
+            onClick={focus}
+            style={{ position: 'relative', zIndex: '100' }}>
             <Editor
               readOnly={readOnly}
               blockStyleFn={getBlockStyle}

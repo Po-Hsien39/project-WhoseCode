@@ -125,6 +125,7 @@ class Article {
   }
   setInitalContent(blocks) {
     console.log(blocks);
+    // Text.clock = 3;
     blocks = blocks.blocks;
     let current = this.blocks;
     for (let i = 0; i < blocks.length; i++) {

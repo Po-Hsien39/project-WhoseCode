@@ -30,18 +30,17 @@ const StatusContext = createContext({
   setCleanCronTab: () => {},
 });
 
-const defaultPermission = {
-  title: '',
-  star: false,
-  permission: {
-    openToPublic: true,
-    allowEdit: false,
-    allowComment: false,
-    allowDuplicate: true,
-  },
-};
-
 const StatusProvider = (props) => {
+  const defaultOtherPermission = {
+    title: '',
+    star: false,
+    permission: {
+      openToPublic: true,
+      allowEdit: false,
+      allowComment: false,
+      allowDuplicate: true,
+    },
+  };
   const navigate = useNavigate();
   const [user, setUser] = useState({
     id: '',
@@ -49,9 +48,11 @@ const StatusProvider = (props) => {
     email: '',
     login: false,
   });
-  const [createNoteDetails, setCreateNoteDetails] = useState(defaultPermission);
+  const [createNoteDetails, setCreateNoteDetails] = useState(
+    defaultOtherPermission
+  );
   const setDefaultCreate = () => {
-    setCreateNoteDetails(defaultPermission);
+    setCreateNoteDetails(defaultOtherPermission);
   };
   const [notes, setNotes] = useState({ private: [], collect: [], delete: [] });
 
@@ -83,7 +84,7 @@ const StatusProvider = (props) => {
   const [editorState, setEditorState] = useState(null);
   const [cleanCronTab, setCleanCronTab] = useState(null);
   const [redirectUrl, setRedirectUrl] = useState('');
-  const [otherNotesPermission, setOtherNotesPermission] = useState({
+  const defaultPermission = {
     status: false,
     blocked: false,
     blockedType: '',
@@ -92,7 +93,13 @@ const StatusProvider = (props) => {
       allowComment: false,
       allowDuplicate: false,
     },
-  });
+  };
+  const [otherNotesPermission, setOtherNotesPermission] =
+    useState(defaultPermission);
+
+  const setDefaultOtherPermission = () => {
+    setOtherNotesPermission(defaultPermission);
+  };
 
   useEffect(() => {
     const socket = io(import.meta.env.VITE_APP_SOCKET_URL);
@@ -156,6 +163,7 @@ const StatusProvider = (props) => {
         setOtherNotesPermission,
         cleanCronTab,
         setCleanCronTab,
+        setDefaultOtherPermission,
       }}
       {...props}
     />

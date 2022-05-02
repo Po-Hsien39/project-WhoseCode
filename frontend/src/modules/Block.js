@@ -41,6 +41,7 @@ class Block {
       }
       currentKey = currentKey.next;
     }
+    console.log(this.showStructure());
   }
 
   insertMultiple({ prev, next, target, fromOutside }) {
@@ -77,6 +78,7 @@ class Block {
 
   insertInitialize(texts) {
     let current = this.texts;
+    Text.clock = 3;
     for (let i = 0; i < texts.length; i++) {
       let newKey = new Text('dev', texts[i]);
       newKey.next = current.next;

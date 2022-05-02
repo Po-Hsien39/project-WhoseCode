@@ -11,13 +11,14 @@ const config = (io) => {
       socket.to('room' + id).emit('newEvent', event);
     });
 
-    socket.on('changeRoom', (noteId) => {
+    socket.on('changeRoom', ({ noteId, allowEdit }) => {
       console.log(socket.rooms);
       for (const room of socket.rooms.values()) {
         if (room !== socket.id) {
           socket.leave(room);
         }
       }
+      if (allowEdit) socket.to('room' + noteId).emit('reset');
       socket.join('room' + noteId);
       socket.emit('joinSuccess', noteId);
     });

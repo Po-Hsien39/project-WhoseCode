@@ -48,6 +48,24 @@ const useRequest = {
       }
     );
   },
+  deleteNote: async (noteId, deletePermanent) => {
+    console.log(noteId, deletePermanent);
+    return await axios.delete(
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      {
+        headers: {
+          authorization: 'Bearer ' + window.localStorage.getItem('token'),
+        },
+        data: { deletePermanent },
+      }
+    );
+  },
+  restoreNote: async (noteId) => {
+    return await axios.put(
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      { type: 'restore' }
+    );
+  },
   addStarToNote: async (noteId, star) => {
     return await axios.put(
       import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,

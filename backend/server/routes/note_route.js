@@ -10,14 +10,12 @@ const {
 
 const authentication = require('../middleware/authentication');
 
-router
-  .route('/note')
-  .post(authentication(), wrapAsync(createNote))
-  .delete(wrapAsync(deleteNote));
+router.route('/note').post(authentication(), wrapAsync(createNote));
 
 router.route('/notes/:id').get(wrapAsync(getAllNotes));
 router
   .route('/note/:id')
   .get(authentication(), wrapAsync(getNote))
-  .put(wrapAsync(modifyNote));
+  .put(wrapAsync(modifyNote))
+  .delete(authentication(), wrapAsync(deleteNote));
 module.exports = router;

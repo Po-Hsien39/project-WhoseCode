@@ -12,9 +12,9 @@ import {
 import MessageIcon from '@mui/icons-material/Message';
 import { useStatus } from '../../hook/useStatus';
 import { timeSince } from '../../utils';
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
-import ReplyIcon from '@mui/icons-material/Reply';
+// import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+// import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
+// import ReplyIcon from '@mui/icons-material/Reply';
 
 const Comment = () => {
   const { request, note, otherNotesPermission } = useStatus();

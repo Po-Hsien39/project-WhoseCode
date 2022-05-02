@@ -6,7 +6,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import Invite from './Invite';
 import { Switch, Divider, Box, Grid, Tooltip, TextField } from '@mui/material';
 import { useStatus } from '../../hook/useStatus';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSnackbar } from '../../hook/useSnackbar';
 
 export default function BasicPopover() {
@@ -15,7 +15,6 @@ export default function BasicPopover() {
   const { showMessage } = useSnackbar();
 
   const handleClick = async (event) => {
-    console.log('123');
     if (!note.id) {
       showMessage('You have to select a note', 'error');
       return;

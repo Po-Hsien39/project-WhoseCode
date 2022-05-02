@@ -6,6 +6,7 @@ import {
   ButtonBase,
   AvatarGroup,
   Avatar,
+  IconButton,
 } from '@mui/material';
 import Animate from './animate';
 import { useStatus } from '../../hook/useStatus';
@@ -16,8 +17,10 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useNavigate } from 'react-router-dom';
 import { timeSince } from '../../utils';
+import EmptySvg from '../../assets/empty.svg?component';
+import { Add as AddIcon } from '@mui/icons-material';
 
-const Board = () => {
+const Board = ({ createNote }) => {
   const { notes, user } = useStatus();
 
   return (
@@ -57,38 +60,76 @@ const Board = () => {
           {`${user.name}'s Home`}
         </Typography>
       </Box>
-      <Typography variant="h6" sx={{ marginTop: '45px' }}>
-        Favorite Notes
-      </Typography>
-      <Box
-        sx={{
-          marginTop: '15px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '25px',
-          position: 'relative',
-          zIndex: 100,
-        }}>
-        {notes.collect
-          ? notes.collect.map((note) => <Note key={note.id} note={note} />)
-          : null}
-      </Box>
-      <Typography variant="h6" sx={{ marginTop: '35px' }}>
-        Private Notes
-      </Typography>
-      <Box
-        sx={{
-          marginTop: '15px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '25px',
-          position: 'relative',
-          zIndex: 100,
-        }}>
-        {notes.private
-          ? notes.private.map((note, i) => <Note key={note.id} note={note} />)
-          : null}
-      </Box>
+      {notes.collect?.length ? (
+        <>
+          <Typography variant="h6" sx={{ marginTop: '45px' }}>
+            Favorite Notes
+          </Typography>
+          <Box
+            sx={{
+              marginTop: '15px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '25px',
+              position: 'relative',
+              zIndex: 100,
+            }}>
+            {notes.collect
+              ? notes.collect.map((note) => <Note key={note.id} note={note} />)
+              : null}
+          </Box>
+        </>
+      ) : null}
+      {notes.private?.length ? (
+        <>
+          <Typography variant="h6" sx={{ marginTop: '35px' }}>
+            Private Notes
+          </Typography>
+          <Box
+            sx={{
+              marginTop: '15px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '25px',
+              position: 'relative',
+              zIndex: 100,
+            }}>
+            {notes.private
+              ? notes.private.map((note, i) => (
+                  <Note key={note.id} note={note} />
+                ))
+              : null}
+          </Box>
+        </>
+      ) : null}
+      {!notes.private?.length && !notes.collect?.length ? (
+        <>
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+            <EmptySvg width="300px" style={{ marginTop: '5%' }} />
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="h6" sx={{ marginRight: '15px' }}>
+                No Any Note yet, create your first one!
+              </Typography>
+              <IconButton
+                sx={{
+                  backgroundColor: 'primary.main',
+                  '&:hover': {
+                    backgroundColor: 'secondary.main',
+                  },
+                }}
+                onClick={createNote}>
+                <AddIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        </>
+      ) : null}
     </Grid>
   );
 };
