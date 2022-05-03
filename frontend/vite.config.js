@@ -59,10 +59,10 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: path.resolve(__dirname, 'index.html'),
-        content: path.resolve(__dirname, 'src/content.js'),
+        content: path.resolve(__dirname, 'src/index.jsx'),
       },
       output: {
-        entryFileNames: 'static/js/[name].js',
+        entryFileNames: 'static/js/build.js',
       },
     },
   },
