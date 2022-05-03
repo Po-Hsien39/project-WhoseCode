@@ -63,6 +63,41 @@ const createNote = async (user_id, note) => {
   }
 };
 
+const createContributor = async (noteId, email, permission) => {
+  await Note.findByIdAndUpdate(noteId, {
+    $push: {
+      'permission.allowOthers': {
+        email,
+        permission,
+      },
+    },
+  });
+};
+
+const updateContributor = async (noteId, email, permission) => {
+  await Note.updateOne(
+    { _id: noteId, 'permission.allowOthers.email': email },
+    {
+      $set: {
+        'permission.allowOthers.$.permission': permission,
+      },
+    }
+  );
+};
+
+const deleteContributor = async (noteId, email) => {
+  await Note.updateOne(
+    { _id: noteId },
+    {
+      $pull: {
+        'permission.allowOthers': {
+          email,
+        },
+      },
+    }
+  );
+};
+
 const modifyNote = async (noteId, star) => {
   await pool.query('UPDATE notes SET star = ? WHERE id = ?', [star, noteId]);
 };
@@ -148,4 +183,7 @@ module.exports = {
   rollBackNote,
   alterPermission,
   restoreNote,
+  createContributor,
+  updateContributor,
+  deleteContributor,
 };

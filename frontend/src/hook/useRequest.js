@@ -49,7 +49,6 @@ const useRequest = {
     );
   },
   deleteNote: async (noteId, deletePermanent) => {
-    console.log(noteId, deletePermanent);
     return await axios.delete(
       import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
       {
@@ -60,6 +59,43 @@ const useRequest = {
       }
     );
   },
+  createNoteContributor: async (noteId, contributor, permission) => {
+    return await axios.put(
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      { email: contributor, permission, type: 'createContributor' },
+      {
+        headers: {
+          authorization: 'Bearer ' + window.localStorage.getItem('token'),
+        },
+      }
+    );
+  },
+
+  updateNoteContributor: async (noteId, contributor, permission) => {
+    console.log(noteId, contributor, permission);
+    return await axios.put(
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      { email: contributor, permission, type: 'editContributor' },
+      {
+        headers: {
+          authorization: 'Bearer ' + window.localStorage.getItem('token'),
+        },
+      }
+    );
+  },
+
+  deleteNoteContributor: async (noteId, contributor) => {
+    return await axios.delete(
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      {
+        headers: {
+          authorization: 'Bearer ' + window.localStorage.getItem('token'),
+        },
+        data: { email: contributor, type: 'deleteContributor' },
+      }
+    );
+  },
+
   restoreNote: async (noteId) => {
     return await axios.put(
       import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,

@@ -74,6 +74,7 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
     }
     if (type === 'note') {
       setVersionNote({ id: '', version: '', content: '' });
+      console.log(note);
       setNote({ ...note, id, star, url });
       navigate(`/notes/${url}`);
     } else if (title === 'Home') {

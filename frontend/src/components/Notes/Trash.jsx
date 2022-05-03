@@ -121,9 +121,7 @@ export default function Trash({ anchorEl, setAnchorEl }) {
           horizontal: 'left',
         }}>
         <Box sx={{ width: '350px', height: '350px', padding: '15px' }}>
-          <Typography variant="h5" fontWeight={'bold'}>
-            Trash
-          </Typography>
+          <Typography variant="h5">Trash</Typography>
           <Divider />
           {notes.delete?.length ? (
             notes?.delete.map((note) => {

@@ -65,6 +65,8 @@ const DraftJSRichTextEditor = ({ url }) => {
         let res;
         try {
           res = await request.getNote(url);
+          console.log(res);
+          // If this note belongs to other user, then set readOnly to true
           if (res.data.permission) {
             const { allowComment, allowEdit, allowDuplicate } =
               res.data.permission;
@@ -74,12 +76,22 @@ const DraftJSRichTextEditor = ({ url }) => {
               permission: { allowComment, allowEdit, allowDuplicate },
             }));
           } else setReadOnly(false);
+          let permission = await request.getPermission(res.data.noteId);
+          // console.log(permission);
           setNote((prev) => {
+            console.log({
+              ...prev,
+              id: res.data.noteId,
+              title: res.data.title,
+              star: res.data.star,
+              permission: permission.data,
+            });
             return {
               ...prev,
               id: res.data.noteId,
               title: res.data.title,
               star: res.data.star,
+              permission: permission.data.permission,
             };
           });
           if (!res.data.latest) {
@@ -105,6 +117,7 @@ const DraftJSRichTextEditor = ({ url }) => {
           }
         } catch (error) {
           console.log(error);
+          if (!error.response?.status) return;
           console.log(error.response.status);
           if (error.response.status === 401) {
             setOtherNotesPermission((prev) => ({
@@ -132,6 +145,11 @@ const DraftJSRichTextEditor = ({ url }) => {
       debounceLoadData(socket, editorState.getCurrentContent(), note.id);
     }
   }, [socket, editorState, note]);
+
+  useEffect(() => {
+    if (!note.id) {
+    }
+  }, [note.id]);
 
   useEffect(() => {
     if (socket && note.id) {
@@ -233,8 +251,6 @@ const DraftJSRichTextEditor = ({ url }) => {
 
   const handleDiff = (newText, targetBlock, sIndex) => {
     let socketEvent = {};
-    console.log(targetBlock.getContent());
-    console.log(newText);
     const diff = textDiff(targetBlock, newText, sIndex, user.id);
     let rowDiff;
     let handled = true;

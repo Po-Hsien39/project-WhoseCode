@@ -35,11 +35,11 @@ const createNote = async (req, res) => {
 };
 
 const modifyNote = async (req, res) => {
-  const { type, star, version, content, permission } = req.body;
+  const { type, star, version, content, permission, email } = req.body;
   const { id: noteId } = req.params;
   if (!noteId) return res.status(400).send('noteId is required');
   if (!type) return res.status(400).send('type is required');
-
+  console.log(type, email, permission);
   if (type === 'star') {
     await Note.modifyNote(noteId, star);
   } else if (type === 'rollback') {
@@ -48,6 +48,14 @@ const modifyNote = async (req, res) => {
     await Note.alterPermission(noteId, permission);
   } else if (type === 'restore') {
     await Note.restoreNote(noteId);
+  } else if (type === 'createContributor') {
+    await Note.createContributor(noteId, email, permission);
+  } else if (type === 'editContributor') {
+    await Note.updateContributor(noteId, email, permission);
+  } else if (type === 'deleteContributor') {
+    await Note.deleteContributor(noteId, email);
+  } else {
+    return res.status(400).send('type is not defined');
   }
   res.send({ status: 'success' });
 };
