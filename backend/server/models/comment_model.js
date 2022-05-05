@@ -1,4 +1,3 @@
-const pool = require('../../util/mysqlcon');
 const { Note, Comment } = require('../../util/schema');
 
 const getComments = async (noteId) => {

@@ -13,6 +13,7 @@ import {
 import { useStatus } from '../../hook/useStatus';
 import { useEffect, useState } from 'react';
 import BootstrapInput from '../../utilComponents/input';
+import { useSnackbar } from '../../hook/useSnackbar';
 const style = {
   position: 'absolute',
   top: '50%',
@@ -29,6 +30,7 @@ export default function SpecificInvite({ open, setOpen }) {
   const [emailValue, setEmailValue] = useState('');
   const { request, note, setNote } = useStatus();
   const [selection, setSelection] = useState('view');
+  const { showMessage } = useSnackbar();
 
   const closeModal = () => {
     setOpen(false);
@@ -116,12 +118,24 @@ export default function SpecificInvite({ open, setOpen }) {
               },
             }}
             onClick={async () => {
+              let res;
+              if (emailValue.trim().length === 0) {
+                return showMessage('Please enter an email address', 'error');
+              }
+
+              try {
+                res = await request.createNoteContributor(
+                  note.id,
+                  emailValue,
+                  selection
+                );
+              } catch (error) {
+                showMessage('User not found', 'error');
+                setEmailValue('');
+                console.log(error);
+                return;
+              }
               setOpen(false);
-              await request.createNoteContributor(
-                note.id,
-                emailValue,
-                selection
-              );
               setEmailValue('');
               setNote((prev) => {
                 return {

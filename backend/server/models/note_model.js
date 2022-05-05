@@ -4,49 +4,78 @@ const { v1: uuidv1 } = require('uuid');
 
 const getNote = async (noteUrl, requireUser) => {
   let [[res]] = await pool.query(
-    'SELECT id, user_id, title, star FROM notes WHERE url = ?',
-    [noteUrl]
+    `SELECT a.id, a.title, a.star, b.userId, b.permission FROM notes as a, permission as b 
+  WHERE a.id = b.noteId and a.url = ? and b.userId = ?`,
+    [noteUrl, requireUser]
   );
-  if (!res) return { error: 'NOT_FOUND' };
-  const { id: noteId, user_id, title, star } = res;
-  // The note belongs to the requester
-  if (requireUser === user_id) {
-    const { latest } = await Note.findById(noteId);
-    return { latest, title, noteId, star };
-  } else {
+
+  if (!res) {
+    const [[{ id: noteId, title }]] = await pool.query(
+      `SELECT id, title  FROM notes WHERE url = ?`,
+      [noteUrl]
+    );
     let { permission, latest } = await Note.findById(noteId);
     if (!permission.openToPublic) {
       return { error: 'PERMISSION_DENIED' };
     }
     permission.owner = false;
-    return { latest, title, noteId, star, permission };
+    return { latest, title, noteId, permission };
+  }
+
+  const { id: noteId, title, star, permission } = res;
+  // The note belongs to the requester
+  if (permission === 1) {
+    const { latest } = await Note.findById(noteId);
+    return { latest, title, noteId, star };
+  } else if (permission) {
+    const { latest } = await Note.findById(noteId);
+    return {
+      latest,
+      title,
+      noteId,
+      star,
+      permission: {
+        owner: false,
+        openToPublic: true,
+        allowEdit: permission <= 2,
+        allowComment: permission <= 3,
+        allowDuplicate: permission <= 4,
+      },
+    };
   }
 };
 
+//TODO: This part should be modified to new schema
 const getAllNotes = async (user_id) => {
-  let [notes] = await pool.query('SELECT * FROM notes WHERE user_id = ?', [
-    user_id,
-  ]);
-  console.log(notes);
+  let [notes] = await pool.query(
+    'select notes.*, permission.permission from notes, permission where notes.id = permission.noteId and permission.userId = ?',
+    [user_id]
+  );
+
   for (let i = 0; i < notes.length; i++) {
-    let { createdAt, updatedAt } = await Note.findById(notes[i].id);
+    let { createdAt, updatedAt, permission } = await Note.findById(notes[i].id);
     notes[i].createdAt = createdAt;
     notes[i].updatedAt = updatedAt;
+    notes[i].permission = permission.allowOthers.map((e) => e.email);
   }
   return notes;
 };
 
+//TODO: This part should be modified to new schema
 const createNote = async (user_id, note) => {
   const conn = await pool.getConnection();
   try {
     await conn.query('START TRANSACTION');
     const { title, star, permission, content } = note;
     const url = uuidv1();
-    let [{ insertId: noteId }] = await pool.query(
-      'INSERT INTO notes (user_id, title, star, url) VALUES (?, ?, ?, ?)',
+    let [{ insertId: noteId }] = await conn.query(
+      'INSERT INTO notes (title, star, url) VALUES (?, ?, ?)',
       [user_id, title, star, url]
     );
-
+    await conn.query(
+      'INSERT INTO permission (userId, noteId, permission) VALUES (?, ?, ?)',
+      [user_id, noteId, 1]
+    );
     await Note.create({
       _id: noteId,
       permission: { ...permission, allowOthers: [] },
@@ -64,17 +93,53 @@ const createNote = async (user_id, note) => {
 };
 
 const createContributor = async (noteId, email, permission) => {
-  await Note.findByIdAndUpdate(noteId, {
-    $push: {
-      'permission.allowOthers': {
-        email,
-        permission,
+  const conn = await pool.getConnection();
+  try {
+    await conn.query('START TRANSACTION');
+    const [[res]] = await conn.query('SELECT id FROM user WHERE email = ?', [
+      email,
+    ]);
+    if (!res) {
+      await conn.query('COMMIT');
+      return { error: 'USER_NOT_FOUND' };
+    }
+    const id = res.id;
+    let pId = 0;
+    if (permission === 'edit') pId = 2;
+    else if (permission === 'comment') pId = 3;
+    else if (permission === 'view') pId = 4;
+    await conn.query(
+      'INSERT INTO permission (userId, noteId, permission) VALUES (?, ?, ?)',
+      [id, noteId, pId]
+    );
+    await Note.findByIdAndUpdate(noteId, {
+      $push: {
+        'permission.allowOthers': {
+          email,
+          permission,
+        },
       },
-    },
-  });
+    });
+
+    await conn.query('COMMIT');
+  } catch (error) {
+    console.log(error);
+    await conn.query('ROLLBACK');
+    return { error };
+  } finally {
+    await conn.release();
+  }
 };
 
 const updateContributor = async (noteId, email, permission) => {
+  let pId;
+  if (permission === 'edit') pId = 2;
+  else if (permission === 'comment') pId = 3;
+  else if (permission === 'view') pId = 4;
+  await pool.query(
+    'UPDATE permission SET permission = ? WHERE noteId = ? and userId = (SELECT id FROM user WHERE email = ?)',
+    [pId, noteId, email]
+  );
   await Note.updateOne(
     { _id: noteId, 'permission.allowOthers.email': email },
     {
@@ -86,6 +151,12 @@ const updateContributor = async (noteId, email, permission) => {
 };
 
 const deleteContributor = async (noteId, email) => {
+  console.log('????????????');
+  console.log(noteId, email);
+  await pool.query(
+    'DELETE FROM permission WHERE noteId = ? and userId = (SELECT id FROM user WHERE email = ?)',
+    [noteId, email]
+  );
   await Note.updateOne(
     { _id: noteId },
     {

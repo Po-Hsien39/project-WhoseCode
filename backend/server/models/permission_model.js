@@ -1,4 +1,3 @@
-const pool = require('../../util/mysqlcon');
 const { Note } = require('../../util/schema');
 
 const getPermission = async (noteId) => {

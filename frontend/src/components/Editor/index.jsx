@@ -70,6 +70,7 @@ const DraftJSRichTextEditor = ({ url }) => {
           if (res.data.permission) {
             const { allowComment, allowEdit, allowDuplicate } =
               res.data.permission;
+            if (allowEdit) setReadOnly(false);
             setOtherNotesPermission((prev) => ({
               ...prev,
               status: true,
@@ -155,9 +156,7 @@ const DraftJSRichTextEditor = ({ url }) => {
     if (socket && note.id) {
       socket.emit('changeRoom', {
         noteId: note.id,
-        allowEdit:
-          !otherNotesPermission.status ||
-          otherNotesPermission.permission.allowEdit,
+        permit: !otherNotesPermission.blocked,
       });
     }
   }, [socket, note.id, otherNotesPermission.status]);
@@ -707,13 +706,13 @@ const DraftJSRichTextEditor = ({ url }) => {
 
   return (
     <Fragment>
-      <button
+      {/* <button
         onClick={() => {
           console.log(content.showStructure());
           console.log(content.blocks.next.showStructure());
         }}>
         Show Structure
-      </button>
+      </button> */}
       {editorState ? (
         <div className="RichEditor-root">
           <BlockStyleControls

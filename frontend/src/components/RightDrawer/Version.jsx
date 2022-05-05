@@ -26,6 +26,7 @@ const Version = ({ setCreateModal, setCreatePage }) => {
     versionNote,
     setDiffVersion,
     diffVersion,
+    user,
   } = useStatus();
   const [versions, setVersions] = useState([]);
   const [open, setOpen] = useState(false);
@@ -155,8 +156,16 @@ const Version = ({ setCreateModal, setCreatePage }) => {
                           direction="row"
                           spacing={1}
                           sx={{ alignItems: 'center' }}>
-                          <Typography variant="h8">
-                            {`Tristan Edited ${note.title}`}
+                          <Typography
+                            variant="h8"
+                            sx={{
+                              width: '170px',
+                              textAlign: 'left',
+                              textOverflow: 'ellipsis',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap',
+                            }}>
+                            {`${user.name} Edited ${note.title}`}
                           </Typography>
                         </Stack>
                         <Typography

@@ -20,6 +20,7 @@ import { useStatus } from '../../hook/useStatus';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../hook/useSnackbar';
 import Trash from './Trash';
+import Export from './Export';
 
 const List = ({ type, title, id, star, setRightopen, url }) => {
   const [onHover, setOnHover] = useState(false);
@@ -28,6 +29,7 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
     setNote,
     note,
     notes,
+    editorState,
     setNotes,
     setVersionNote,
     setDiffVersion,
@@ -37,6 +39,7 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
     request,
   } = useStatus();
   const [open, setOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const handleClose = () => setOpen(false);
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
@@ -62,7 +65,6 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
   };
 
   const handleClick = (event) => {
-    console.log(setRightopen);
     if (setRightopen) setRightopen(false);
     if (diffVersion.compare) {
       setDiffVersion({
@@ -82,6 +84,9 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
       navigate('/notes/all');
     } else if (title === 'Trash') {
       setAnchorEl(event.currentTarget);
+    } else if (title === 'Export') {
+      if (!note.id) return showMessage('Please select a note', 'error');
+      setExportOpen(true);
     } else {
       console.log('Function not support');
     }
@@ -104,6 +109,7 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
   return (
     <>
       <Trash anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
+      <Export open={exportOpen} setOpen={setExportOpen} />
       <Modal
         open={open}
         onClose={handleClose}
@@ -207,9 +213,9 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
           )}
           <Typography
             sx={{
+              width: onHover && type === 'note' ? '150px' : '180px',
               textAlign: 'left',
               textOverflow: 'ellipsis',
-              width: onHover && type === 'note' ? '150px' : '180px',
               overflow: 'hidden',
               whiteSpace: 'nowrap',
             }}>

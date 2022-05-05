@@ -85,13 +85,13 @@ const useRequest = {
   },
 
   deleteNoteContributor: async (noteId, contributor) => {
-    return await axios.delete(
+    return await axios.put(
       import.meta.env.VITE_APP_DOMAIN + '/api/1.0/note/' + noteId,
+      { email: contributor, type: 'deleteContributor' },
       {
         headers: {
           authorization: 'Bearer ' + window.localStorage.getItem('token'),
         },
-        data: { email: contributor, type: 'deleteContributor' },
       }
     );
   },

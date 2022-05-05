@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
 import { styled, useTheme } from '@mui/material/styles';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   Tooltip,
   Toolbar,
@@ -27,6 +27,7 @@ import {
   Add as AddIcon,
   Comment as CommentIcon,
 } from '@mui/icons-material';
+import { useSnackbar } from '../hook/useSnackbar';
 import Editor from './Editor';
 import { useStatus } from '../hook/useStatus';
 import MyList from '../components/Notes/List';
@@ -89,6 +90,7 @@ export default function PersistentDrawerLeft() {
     setDefaultCreate,
     otherNotesPermission,
   } = useStatus();
+  const { showMessage } = useSnackbar();
   const theme = useTheme();
   const [open, setOpen] = useState(true);
   const [rightopen, setRightopen] = useState(false);
@@ -236,7 +238,11 @@ export default function PersistentDrawerLeft() {
               : 'Send star to the author'
           }
           placement="bottom">
-          <IconButton onClick={() => editFavorite()}>
+          <IconButton
+            onClick={() => {
+              if (note.id) editFavorite();
+              else showMessage('Please select a note', 'error');
+            }}>
             {!note.star ? (
               <StarBorderIcon />
             ) : (
@@ -329,7 +335,7 @@ export default function PersistentDrawerLeft() {
         </DrawerHeader>
         <Divider />
         <List>
-          {['Home', 'Quick Find', 'All Updates', 'Setting'].map((text) => (
+          {['Home', 'All Updates', 'Setting'].map((text) => (
             <MyList title={text} key={text} setRightopen={setRightopen} />
           ))}
         </List>
@@ -352,6 +358,7 @@ export default function PersistentDrawerLeft() {
               </IconButton>
             </Box>
             {notes.collect.map((note, i) => {
+              console.log(note);
               return (
                 <MyList
                   title={note.title}
@@ -384,6 +391,7 @@ export default function PersistentDrawerLeft() {
         </Box>
         {notes.private
           ? notes.private.map((note, i) => {
+              console.log(note);
               return (
                 <MyList
                   title={note.title}

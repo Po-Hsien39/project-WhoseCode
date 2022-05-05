@@ -106,6 +106,9 @@ const StatusProvider = (props) => {
     setSocket(socket);
   }, []);
 
+  useEffect(() => {
+    console.log(socket);
+  }, [socket]);
   const location = useLocation();
   useEffect(() => {
     const getProfileData = async () => {

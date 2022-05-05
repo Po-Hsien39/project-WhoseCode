@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { timeSince } from '../../utils';
 import EmptySvg from '../../assets/empty.svg?component';
 import { Add as AddIcon } from '@mui/icons-material';
+import { useEffect } from 'react';
 
 const Board = ({ createNote }) => {
   const { notes, user } = useStatus();
@@ -137,8 +138,12 @@ const Board = ({ createNote }) => {
 export default Board;
 
 const Note = ({ note }) => {
-  const { setNote } = useStatus();
+  const { setNote, notes, user } = useStatus();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log(notes);
+  }, [notes]);
 
   return (
     <Box key={note.id}>
@@ -201,20 +206,20 @@ const Note = ({ note }) => {
                     backgroundColor: 'rgba(0, 0, 0, .3)',
                   },
                 }}>
-                <Avatar alt="Remy Sharp" src={`//joeschmoe.io/api/v1/test`} />
                 <Avatar
                   alt="Travis Howard"
-                  src={`//joeschmoe.io/api/v1/test2`}
+                  src={`//joeschmoe.io/api/v1/${user.name}`}
                 />
-                <Avatar alt="Cindy Baker" src={`//joeschmoe.io/api/v1/test3`} />
-                <Avatar
-                  alt="Agnes Walker"
-                  src={`//joeschmoe.io/api/v1/test4`}
-                />
-                <Avatar
-                  alt="Trevor Henderson"
-                  src="/static/images/avatar/5.jpg"
-                />
+                ;
+                {note.permission.map((email) => {
+                  return (
+                    <Avatar
+                      key={email}
+                      alt="Travis Howard"
+                      src={`//joeschmoe.io/api/v1/${email}`}
+                    />
+                  );
+                })}
               </AvatarGroup>
             </Grid>
           </Grid>

@@ -49,7 +49,9 @@ const modifyNote = async (req, res) => {
   } else if (type === 'restore') {
     await Note.restoreNote(noteId);
   } else if (type === 'createContributor') {
-    await Note.createContributor(noteId, email, permission);
+    let result = await Note.createContributor(noteId, email, permission);
+    if (result?.error === 'USER_NOT_FOUND')
+      return res.status(400).send({ status: 'USER_NOT_FOUND' });
   } else if (type === 'editContributor') {
     await Note.updateContributor(noteId, email, permission);
   } else if (type === 'deleteContributor') {
