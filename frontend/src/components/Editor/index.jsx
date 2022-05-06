@@ -44,6 +44,7 @@ const DraftJSRichTextEditor = ({ url }) => {
     cleanCronTab,
     setCleanCronTab,
     user,
+    noteFont,
   } = useStatus();
   // const [editorState, setEditorState] = useState(null);
   const [readOnly, setReadOnly] = useState(true);
@@ -714,7 +715,18 @@ const DraftJSRichTextEditor = ({ url }) => {
         Show Structure
       </button> */}
       {editorState ? (
-        <div className="RichEditor-root">
+        <div
+          className="RichEditor-root"
+          style={{
+            fontFamily:
+              noteFont === 'Mono'
+                ? 'monospace'
+                : noteFont === 'Default'
+                ? 'Georgia , serif'
+                : 'serif',
+          }}
+          // noteFont === 'mono' ? 'monospace' : noteFont === 'default'?
+        >
           <BlockStyleControls
             editorState={editorState}
             onToggle={toggleBlockType}

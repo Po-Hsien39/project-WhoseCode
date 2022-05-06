@@ -37,6 +37,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import PopoverPopupState from '../components/RightDrawer/Share';
 import Create from '../components/Notes/Create';
 import Error from '../components/Notes/Error';
+import Setting from '../components/Notes/Setting';
 const drawerWidth = 240;
 const drawerRight = 400;
 
@@ -89,6 +90,7 @@ export default function PersistentDrawerLeft() {
     setVersionNote,
     setDefaultCreate,
     otherNotesPermission,
+    setFunctionController,
   } = useStatus();
   const { showMessage } = useSnackbar();
   const theme = useTheme();
@@ -98,6 +100,8 @@ export default function PersistentDrawerLeft() {
   const [createModal, setCreateModal] = useState(false);
   const { id: currentUrl } = useParams();
   const [createPage, setCreatePage] = useState({ page: 1, type: 'next' });
+  const [openSetting, setOpenSetting] = useState(false);
+  const [openAnchor, setOpenAnchor] = useState(null);
 
   // Get User Notes
   useEffect(() => {
@@ -130,6 +134,7 @@ export default function PersistentDrawerLeft() {
       fetchNotes();
     }
   }, [user]);
+
   useEffect(() => {
     const getNote = async () => {
       if (currentUrl) {
@@ -138,17 +143,41 @@ export default function PersistentDrawerLeft() {
           setVersionNote({ id: '', version: '', content: '' });
           setNote({ ...note, star: false, id: null, url: null });
         } else {
-          console.log('currentUrl', currentUrl);
-          // let res = await request.getNote(currentUrl);
           setNote((prev) => {
             return { ...prev, url: currentUrl };
           });
-          // console.log(res);
         }
       }
     };
     getNote();
   }, [currentUrl]);
+
+  useEffect(() => {
+    if (setRightopen && setRightDrawerType) {
+      setFunctionController((prev) => ({
+        ...prev,
+        showComment: () => {
+          setRightopen(true);
+          setRightDrawerType('comment');
+        },
+        showVersion: () => {
+          setRightopen(true);
+          setRightDrawerType('version');
+        },
+      }));
+    }
+  }, [setRightopen, setRightDrawerType]);
+
+  useEffect(() => {
+    if (setFunctionController)
+      setFunctionController((prev) => ({
+        ...prev,
+        editFavorite: () => {
+          editFavorite();
+        },
+      }));
+  }, [setFunctionController]);
+
   const createNote = async () => {
     setCreatePage({ page: 1, type: 'next' });
     setCreateModal(true);
@@ -251,10 +280,20 @@ export default function PersistentDrawerLeft() {
           </IconButton>
         </Tooltip>
         <Tooltip title="Other Settings" placement="bottom">
-          <IconButton>
+          <IconButton
+            onClick={(e) => {
+              setOpenSetting(true);
+              setOpenAnchor(e.currentTarget);
+            }}>
             <MoreHorizIcon />
           </IconButton>
         </Tooltip>
+        <Setting
+          open={openSetting}
+          setOpen={setOpenSetting}
+          anchor={openAnchor}
+          setAnchor={setOpenAnchor}
+        />
       </Box>
 
       <CssBaseline />
@@ -335,7 +374,7 @@ export default function PersistentDrawerLeft() {
         </DrawerHeader>
         <Divider />
         <List>
-          {['Home', 'All Updates', 'Setting'].map((text) => (
+          {['Home', 'Logout'].map((text) => (
             <MyList title={text} key={text} setRightopen={setRightopen} />
           ))}
         </List>
@@ -358,7 +397,6 @@ export default function PersistentDrawerLeft() {
               </IconButton>
             </Box>
             {notes.collect.map((note, i) => {
-              console.log(note);
               return (
                 <MyList
                   title={note.title}

@@ -28,6 +28,8 @@ const StatusContext = createContext({
   setOtherNotesPermission: () => {},
   cleanCronTab: null,
   setCleanCronTab: () => {},
+  noteFont: 'default',
+  setNoteFont: () => {},
 });
 
 const StatusProvider = (props) => {
@@ -55,11 +57,18 @@ const StatusProvider = (props) => {
     setCreateNoteDetails(defaultOtherPermission);
   };
   const [notes, setNotes] = useState({ private: [], collect: [], delete: [] });
-
   const [versionNote, setVersionNote] = useState({
     id: '',
     version: '',
     content: '',
+  });
+  const [noteFont, setNoteFont] = useState('Default');
+  const [functionControl, setFunctionController] = useState({
+    export: null,
+    showVersion: null,
+    showComment: null,
+    editFavorite: null,
+    logout: null,
   });
   const [diffVersion, setDiffVersion] = useState({
     compare: false,
@@ -167,6 +176,10 @@ const StatusProvider = (props) => {
         cleanCronTab,
         setCleanCronTab,
         setDefaultOtherPermission,
+        noteFont,
+        setNoteFont,
+        functionControl,
+        setFunctionController,
       }}
       {...props}
     />

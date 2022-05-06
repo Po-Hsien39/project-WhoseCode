@@ -14,8 +14,9 @@ import {
   Delete as DeleteIcon,
   IosShare as IosShareIcon,
   Home as HomeIcon,
+  Logout as LogoutIcon,
 } from '@mui/icons-material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStatus } from '../../hook/useStatus';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../hook/useSnackbar';
@@ -28,8 +29,7 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
   const {
     setNote,
     note,
-    notes,
-    editorState,
+    setUser,
     setNotes,
     setVersionNote,
     setDiffVersion,
@@ -37,12 +37,34 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
     otherNotesPermission,
     setDefaultOtherPermission,
     request,
+    setFunctionController,
   } = useStatus();
   const [open, setOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const handleClose = () => setOpen(false);
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
+  const [openLogout, setOpenLogout] = useState(false);
+
+  useEffect(() => {
+    if (setExportOpen && title === 'Export') {
+      setFunctionController((prev) => ({
+        ...prev,
+        export: setExportOpen,
+      }));
+    }
+  }, [setExportOpen, title]);
+
+  useEffect(() => {
+    if (setExportOpen && title === 'Logout') {
+      setFunctionController((prev) => ({
+        ...prev,
+        logout: () => {
+          setOpenLogout(true);
+        },
+      }));
+    }
+  }, [setOpenLogout, title]);
 
   const iconPicker = (text) => {
     if (text === 'Home') {
@@ -59,6 +81,8 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
       return <DeleteIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />;
     } else if (text === 'Export') {
       return <IosShareIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />;
+    } else if (text === 'Logout') {
+      return <LogoutIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />;
     } else {
       return null;
     }
@@ -87,6 +111,8 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
     } else if (title === 'Export') {
       if (!note.id) return showMessage('Please select a note', 'error');
       setExportOpen(true);
+    } else if (title === 'Logout') {
+      setOpenLogout(true);
     } else {
       console.log('Function not support');
     }
@@ -180,6 +206,66 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
                 },
               }}
               onClick={handleClose}>
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+      <Modal
+        open={openLogout}
+        onClose={() => {
+          setOpenLogout(false);
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description">
+        <Box sx={style}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography fontWeight={'bold'} variant="h5">
+              Logout
+            </Typography>
+          </Box>
+          <Divider />
+          <Box sx={{ marginTop: '20px', marginBottom: '15px' }}>
+            <Typography sx={{ color: '#E63832' }} fontWeight="bold">
+              Warning: You are going to logout the application
+            </Typography>
+            <Typography variant="h8">
+              Are you sure you want to logout?
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              variant="contained"
+              color="tetiary"
+              sx={{ marginRight: '15px', width: '80px' }}
+              onClick={() => {
+                window.localStorage.removeItem('token');
+                setUser({
+                  id: '',
+                  name: '',
+                  email: '',
+                  login: false,
+                });
+                showMessage('Bye ~');
+                navigate('/');
+                setOpenLogout(false);
+              }}>
+              Sure
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                width: '80px',
+                '&:hover': {
+                  backgroundColor: 'primary.main',
+                  color: 'primary',
+                },
+              }}
+              onClick={() => {
+                setOpenLogout(false);
+              }}>
               Cancel
             </Button>
           </Box>

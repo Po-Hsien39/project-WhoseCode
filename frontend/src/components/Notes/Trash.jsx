@@ -12,7 +12,7 @@ import {
 import { useStatus } from '../../hook/useStatus';
 import RestoreIcon from '@mui/icons-material/Restore';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../hook/useSnackbar';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
@@ -44,6 +44,7 @@ export default function Trash({ anchorEl, setAnchorEl }) {
   const closeModal = () => {
     setOpenModal(false);
   };
+
   return (
     <>
       <Modal

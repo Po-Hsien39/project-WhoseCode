@@ -34,7 +34,10 @@ export default function MyAppBar() {
                 variant="h5"
                 noWrap
                 component="div"
-                sx={{ display: { xs: 'none', sm: 'block' } }}>
+                sx={{ display: { xs: 'none', sm: 'block' } }}
+                onClick={() => {
+                  navigate('/');
+                }}>
                 WhoseCode
               </Typography>
             </ButtonBase>
@@ -49,7 +52,12 @@ export default function MyAppBar() {
                 return (
                   <Button
                     key={i}
-                    onClick={() => changePage(i)}
+                    onClick={() => {
+                      if (i === 0) {
+                        navigate('/');
+                      }
+                      changePage(i);
+                    }}
                     sx={{
                       color:
                         i === currentPage ? 'primary.dark' : 'primary.light',
@@ -72,6 +80,9 @@ export default function MyAppBar() {
                 aria-haspopup="true"
                 color="inherit">
                 <Avatar
+                  onClick={() => {
+                    navigate('/login');
+                  }}
                   sx={{
                     width: 30,
                     height: 30,

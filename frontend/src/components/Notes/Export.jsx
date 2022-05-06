@@ -3,6 +3,7 @@ import { useStatus } from '../../hook/useStatus';
 import { stateToHTML } from 'draft-js-export-html';
 import html2canvas from 'html2canvas';
 import jsPdf from 'jspdf';
+import { useEffect } from 'react';
 
 const style = {
   position: 'absolute',
