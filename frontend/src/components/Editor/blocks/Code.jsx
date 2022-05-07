@@ -25,8 +25,7 @@ const CodeWrapper = (props) => {
   const { showMessage } = useSnackbar();
 
   const getCode = async (e) => {
-    console.log(e.target);
-    const svg = e.target.parentElement.querySelector('svg');
+    const svg = e.target.parentElement.parentElement.querySelector('svg');
     const codeBlock =
       svg.parentElement.parentElement.parentElement.parentElement.parentElement;
 

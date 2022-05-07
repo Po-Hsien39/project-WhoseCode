@@ -115,14 +115,10 @@ const StatusProvider = (props) => {
     setSocket(socket);
   }, []);
 
-  useEffect(() => {
-    console.log(socket);
-  }, [socket]);
   const location = useLocation();
   useEffect(() => {
     const getProfileData = async () => {
       const access_token = window.localStorage.getItem('token');
-      console.log(access_token);
       if (!access_token) {
         setRedirectUrl(location);
         if (location.pathname !== '/') {

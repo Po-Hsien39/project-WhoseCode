@@ -64,7 +64,6 @@ const Login = () => {
           navigate(redirectUrl);
         else navigate('/');
       } catch (err) {
-        console.log(err.code);
         showMessage(err.response.data.error, 'error', 2000);
       }
     }

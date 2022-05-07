@@ -232,6 +232,7 @@ const Page3 = ({ setPage, setOpen }) => {
     setNotes,
     setVersionNote,
     versionNote,
+    setNote,
   } = useStatus();
   const navigate = useNavigate();
 
@@ -240,8 +241,9 @@ const Page3 = ({ setPage, setOpen }) => {
       ...createNoteDetails,
       content: versionNote.id ? versionNote.content : null,
     });
-    let { url, noteId, star, title } = note.data;
-    // setNote({ ...note, id: note.data.noteId, star: false });
+    let { url, noteId, star, title, permission } = note.data;
+    console.log(url, noteId, star, title);
+    setNote({ ...note, id: note.data.noteId, star, title, permission });
     console.log(versionNote.content);
     setVersionNote({ id: '', version: '', content: '' });
     navigate(`/notes/${url}`);

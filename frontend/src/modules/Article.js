@@ -10,8 +10,6 @@ class Article {
     this.blocks.next.next.prev = this.blocks.next;
   }
   clearGarbage() {
-    // console.log('clearGarbage', new Date());
-    // console.log(this.showStructure());
     let current = this.blocks.next;
     while (current.uId !== null) {
       // Throw away deleted blocks
@@ -124,7 +122,6 @@ class Article {
     return structure;
   }
   setInitalContent(blocks) {
-    console.log(blocks);
     // Text.clock = 3;
     blocks = blocks.blocks;
     let current = this.blocks;
@@ -150,6 +147,38 @@ class Article {
       current = current.next;
     }
     return current;
+  }
+  getSelectionBlock(startBlockIndex, endBlockIndex) {
+    let blocksKey = [];
+    let current = this.blocks;
+    let index = -1;
+    while (index !== endBlockIndex) {
+      if (!current.isDeleted && current.uId) {
+        index++;
+        if (index >= startBlockIndex && index <= endBlockIndex)
+          blocksKey.push(current.uId);
+      }
+      if (index !== endBlockIndex) current = current.next;
+    }
+    return blocksKey;
+  }
+  getBlocksFromId(blocks) {
+    let rowNum = 0;
+    let current = this.blocks.next;
+    let target = 0;
+    let indexes = [];
+    while (current !== null) {
+      if (current.uId === blocks[target]) {
+        if (!current.isDeleted) indexes.push(rowNum);
+        else indexes.push(-1);
+
+        if (target === blocks.length - 1) break;
+        else target++;
+      }
+      if (!current.isDeleted) rowNum++;
+      current = current.next;
+    }
+    return indexes;
   }
   idToRowNum(uId) {
     let rowNum = 0;

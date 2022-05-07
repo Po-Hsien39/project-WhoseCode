@@ -13,8 +13,6 @@ class Block {
     this.inGarbage = false;
   }
   insertKey({ prev, target, next, fromOutside }) {
-    // console.log(prev, target, next, fromOutside);
-    console.log(target);
     let currentKey = this.texts;
     while (currentKey.next !== null) {
       if (Text.compare(prev, currentKey)) {
@@ -41,7 +39,7 @@ class Block {
       }
       currentKey = currentKey.next;
     }
-    console.log(this.showStructure());
+    // console.log(this.showStructure());
   }
 
   insertMultiple({ prev, next, target, fromOutside }) {
@@ -91,8 +89,8 @@ class Block {
 
   deleteKey({ target }) {
     let currentKey = this.texts;
-    console.log(target);
-    console.log(this.showStructure());
+    // console.log(target);
+    // console.log(this.showStructure());
     while (currentKey.next !== null) {
       if (Text.compare(target, currentKey)) {
         currentKey.isDeleted = true;

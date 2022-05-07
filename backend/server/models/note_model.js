@@ -70,7 +70,7 @@ const createNote = async (user_id, note) => {
     const url = uuidv1();
     let [{ insertId: noteId }] = await conn.query(
       'INSERT INTO notes (title, star, url) VALUES (?, ?, ?)',
-      [user_id, title, star, url]
+      [title, star, url]
     );
     await conn.query(
       'INSERT INTO permission (userId, noteId, permission) VALUES (?, ?, ?)',
@@ -83,7 +83,7 @@ const createNote = async (user_id, note) => {
     });
 
     await conn.query('COMMIT');
-    return { url, noteId, star, title };
+    return { url, noteId, star, title, permission };
   } catch (error) {
     await conn.query('ROLLBACK');
     return { error };
@@ -240,6 +240,7 @@ const deleteNote = async (id, deletePermanent) => {
       id,
     ]);
   else {
+    await pool.query('DELETE FROM permission WHERE noteId = ?', [id]);
     await pool.query('DELETE FROM notes WHERE id = ?', [id]);
     await Note.findByIdAndDelete(id);
   }

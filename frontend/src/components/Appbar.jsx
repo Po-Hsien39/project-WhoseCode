@@ -78,11 +78,11 @@ export default function MyAppBar() {
                 aria-label="account of current user"
                 // aria-controls={menuId}
                 aria-haspopup="true"
-                color="inherit">
+                color="inherit"
+                onClick={() => {
+                  navigate('/login');
+                }}>
                 <Avatar
-                  onClick={() => {
-                    navigate('/login');
-                  }}
                   sx={{
                     width: 30,
                     height: 30,

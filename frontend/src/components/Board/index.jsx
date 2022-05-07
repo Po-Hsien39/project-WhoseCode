@@ -23,6 +23,9 @@ import { useEffect } from 'react';
 
 const Board = ({ createNote }) => {
   const { notes, user } = useStatus();
+  useEffect(() => {
+    console.log(notes);
+  }, [notes]);
 
   return (
     <Grid
@@ -142,8 +145,8 @@ const Note = ({ note }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(notes);
-  }, [notes]);
+    console.log(note);
+  }, [note]);
 
   return (
     <Box key={note.id}>
@@ -211,15 +214,17 @@ const Note = ({ note }) => {
                   src={`//joeschmoe.io/api/v1/${user.name}`}
                 />
                 ;
-                {note.permission.map((email) => {
-                  return (
-                    <Avatar
-                      key={email}
-                      alt="Travis Howard"
-                      src={`//joeschmoe.io/api/v1/${email}`}
-                    />
-                  );
-                })}
+                {note.permission
+                  ? note.permission.map((email) => {
+                      return (
+                        <Avatar
+                          key={email}
+                          alt="Travis Howard"
+                          src={`//joeschmoe.io/api/v1/${email}`}
+                        />
+                      );
+                    })
+                  : null}
               </AvatarGroup>
             </Grid>
           </Grid>

@@ -57,7 +57,6 @@ const generateDiff = (blockIdOld, blockIdNew, blockOld, blockNew, reverse) => {
 };
 
 const lcs = (a, b) => {
-  console.log(a, b);
   const m = a.length;
   const n = b.length;
   const c = [];
@@ -129,8 +128,6 @@ const showDiff = (oldVersion, latestVersion) => {
     deepCloneBlocks(oldVersion.blocks),
     diff
   );
-  console.log(oldVersionBlocks, demoBlocks);
-  console.log(demoBlocks);
   let demoVersion = { ...oldVersion };
   latestVersion.blocks = oldVersionBlocks;
   demoVersion.blocks = demoBlocks;
@@ -141,8 +138,6 @@ const showDiff = (oldVersion, latestVersion) => {
 };
 
 const generateCompare = (oldVersionBlocks, demoBlocks, diff) => {
-  console.log(oldVersionBlocks === demoBlocks);
-  console.log(oldVersionBlocks[1] === demoBlocks[1]);
   for (let i = 0; i < demoBlocks.length; i++) {
     demoBlocks[i].type += '-correct';
   }

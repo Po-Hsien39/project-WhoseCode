@@ -27,10 +27,7 @@ export default function BasicPopover() {
   const [openInviteModal, setOpenInviteModal] = useState(false);
   const { setNote, request, note, otherNotesPermission, user } = useStatus();
   const { showMessage } = useSnackbar();
-  useEffect(() => {
-    console.log(note.permission.allowOthers);
-    console.log(note.permission.allowOthers?.length);
-  }, [note.permission.allowOthers]);
+
   const handleClick = async (event) => {
     if (!note.id) {
       showMessage('You have to select a note', 'error');
@@ -158,7 +155,6 @@ export default function BasicPopover() {
                       },
                     }}
                     onClick={() => {
-                      console.log(note.permission.allowOthers);
                       if (
                         note.permission?.allowOthers &&
                         note.permission.allowOthers.length > 4
@@ -221,9 +217,6 @@ export default function BasicPopover() {
 
 const Person = ({ item }) => {
   const { setNote, request, note } = useStatus();
-  useEffect(() => {
-    console.log(item);
-  }, [item]);
   return (
     <>
       <Divider />

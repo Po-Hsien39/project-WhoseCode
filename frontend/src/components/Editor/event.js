@@ -30,6 +30,9 @@ const EventHandle = (editorState, event, content) => {
   const blockId = event.block;
   const targetBlock = content.getBlockFromId(blockId);
   const blockNum = content.idToRowNum(blockId);
+  console.log(content.showStructure());
+  console.log(editorState.getCurrentContent());
+  console.log(blockNum);
   let blocks = editorState.getCurrentContent().getBlocksAsArray();
   const selection = editorState.getSelection();
   let newBlockKey, finalText;
@@ -45,38 +48,44 @@ const EventHandle = (editorState, event, content) => {
     .getBlockMap()
     .keySeq()
     .findIndex((k) => k === newSelection.anchorKey);
+  console.log(editorState.getCurrentContent());
+  console.log(newSelection.anchorKey);
   let newRaws = convertToRaw(editorState.getCurrentContent());
-  let newContent = null,
-    deleteNum = 0,
-    currentId = content.rowNumToId(currentBlockIndex);
+  let newContent = null;
+  let deleteNum = 0;
+  console.log(currentBlockIndex);
+  let currentId = content.rowNumToId(currentBlockIndex);
   if (event && event.type === 'insert') {
     Text.updateClock(event.target.clock);
-    // console.log(targetBlock.showStructure());
     targetBlock.insertKey({ ...event, fromOutside: true });
-    // console.log(targetBlock.showStructure());
-    newRaws.blocks[blockNum].text = targetBlock.getContent();
+    if (blockNum >= 0) newRaws.blocks[blockNum].text = targetBlock.getContent();
     newContent = convertFromRaw(newRaws);
   } else if (event && event.type === 'insertMultiple') {
     console.log('insertMultiple');
     targetBlock.insertMultiple({ ...event, fromOutside: true });
-    newRaws.blocks[blockNum].text = targetBlock.getContent();
+    if (blockNum >= 0) newRaws.blocks[blockNum].text = targetBlock.getContent();
     newContent = convertFromRaw(newRaws);
   } else if (event && event.type === 'delete') {
     targetBlock.deleteKey(event);
-    newRaws.blocks[blockNum].text = targetBlock.getContent();
+    if (blockNum >= 0) newRaws.blocks[blockNum].text = targetBlock.getContent();
     newContent = convertFromRaw(newRaws);
   } else if (event && event.type === 'deleteMultiple') {
     deleteNum = targetBlock.deleteMultiple({
       target: event.target,
       currentCursor: newSelection.anchorOffset,
     });
-    newRaws.blocks[blockNum].text = targetBlock.getContent();
+    if (blockNum >= 0) newRaws.blocks[blockNum].text = targetBlock.getContent();
     newContent = convertFromRaw(newRaws);
   } else if (event && event.type === 'changeStyle') {
-    targetBlock.style = event.style;
-    newRaws.blocks[blockNum].type = targetBlock.style;
+    let blocks = event.blocks;
+    let style = event.style;
+    let indexes = content.getBlocksFromId(blocks);
+    for (let i = 0; i < indexes.length; i++) {
+      newRaws.blocks[indexes[i]].type = style;
+    }
     newContent = convertFromRaw(newRaws);
   } else if (event && event.type === 'createBlock') {
+    //TODO: Error Handle
     // First delete modify previous block
     if (event.deleteType === 'delete')
       targetBlock.deleteKey({ target: event.deleteKeys });
@@ -107,6 +116,7 @@ const EventHandle = (editorState, event, content) => {
     insertedRaw.blocks[blockNum + 1].text = newBlock.getContent();
     newContent = convertFromRaw(insertedRaw);
   } else if (event && event.type === 'createBlocks') {
+    //TODO: Error Handle
     // First delete modify previous block
     if (event.deleteType === 'delete')
       targetBlock.deleteKey({ target: event.deleteKeys });
@@ -154,11 +164,13 @@ const EventHandle = (editorState, event, content) => {
           target.insertMultiple(insertContent);
       }
       newRaws.blocks[blockNum + i].text = target.getContent();
+      newRaws.blocks[blockNum + i].type = event.style;
       blocks = convertFromRaw(newRaws).getBlocksAsArray();
     }
     if (blockDetails.length === 1) finalText += event.cursor;
     newContent = convertFromRaw(newRaws);
   } else if (event && event.type === 'removeBlock') {
+    //TODO: Error Handle
     // First delete modify previous block
     const target = event.target;
     content.removeBlock(blockId);
@@ -180,6 +192,7 @@ const EventHandle = (editorState, event, content) => {
     modifiedRaws.blocks[blockNum - 1].text = targetBlock.getContent();
     newContent = convertFromRaw(modifiedRaws);
   } else if (event && event.type === 'removeBlocks') {
+    //TODO: Error Handle
     // First remove blocks
     for (let i = 0; i < event.target.length; i++) {
       const blockIndex = content.idToRowNum(event.target[i]);
@@ -207,7 +220,6 @@ const EventHandle = (editorState, event, content) => {
       modifiedRaws.blocks[blockNum].text = targetBlock.getContent();
       newContent = convertFromRaw(modifiedRaws);
     }
-    // return editorState;
   } else {
     console.log('unknown event');
     return editorState;

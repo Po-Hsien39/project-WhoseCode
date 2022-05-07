@@ -39,10 +39,6 @@ export default function SpecificInvite({ open, setOpen }) {
     if (open) setEmailValue('');
   }, [open]);
 
-  useEffect(() => {
-    console.log(note);
-  }, [note]);
-
   return (
     <Modal
       open={open}
@@ -132,7 +128,6 @@ export default function SpecificInvite({ open, setOpen }) {
               } catch (error) {
                 showMessage('User not found', 'error');
                 setEmailValue('');
-                console.log(error);
                 return;
               }
               setOpen(false);

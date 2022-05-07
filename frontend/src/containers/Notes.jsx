@@ -429,7 +429,6 @@ export default function PersistentDrawerLeft() {
         </Box>
         {notes.private
           ? notes.private.map((note, i) => {
-              console.log(note);
               return (
                 <MyList
                   title={note.title}

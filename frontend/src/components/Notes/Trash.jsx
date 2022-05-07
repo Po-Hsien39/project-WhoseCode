@@ -125,10 +125,10 @@ export default function Trash({ anchorEl, setAnchorEl }) {
           <Typography variant="h5">Trash</Typography>
           <Divider />
           {notes.delete?.length ? (
-            notes?.delete.map((note) => {
+            notes?.delete.map((note, i) => {
               return (
                 <Card
-                  key={note.title}
+                  key={note.title + i}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',

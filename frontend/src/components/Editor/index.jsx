@@ -40,7 +40,6 @@ const DraftJSRichTextEditor = ({ url }) => {
     setNote,
     note,
     setOtherNotesPermission,
-    otherNotesPermission,
     cleanCronTab,
     setCleanCronTab,
     user,
@@ -66,7 +65,6 @@ const DraftJSRichTextEditor = ({ url }) => {
         let res;
         try {
           res = await request.getNote(url);
-          console.log(res);
           // If this note belongs to other user, then set readOnly to true
           if (res.data.permission) {
             const { allowComment, allowEdit, allowDuplicate } =
@@ -81,13 +79,6 @@ const DraftJSRichTextEditor = ({ url }) => {
           let permission = await request.getPermission(res.data.noteId);
           // console.log(permission);
           setNote((prev) => {
-            console.log({
-              ...prev,
-              id: res.data.noteId,
-              title: res.data.title,
-              star: res.data.star,
-              permission: permission.data,
-            });
             return {
               ...prev,
               id: res.data.noteId,
@@ -149,18 +140,12 @@ const DraftJSRichTextEditor = ({ url }) => {
   }, [socket, editorState, note]);
 
   useEffect(() => {
-    if (!note.id) {
-    }
-  }, [note.id]);
-
-  useEffect(() => {
     if (socket && note.id) {
       socket.emit('changeRoom', {
         noteId: note.id,
-        permit: !otherNotesPermission.blocked,
       });
     }
-  }, [socket, note.id, otherNotesPermission.status]);
+  }, [socket, note.id]);
 
   useEffect(() => {
     if (socket && content) {
@@ -231,13 +216,13 @@ const DraftJSRichTextEditor = ({ url }) => {
       content.getBlock(startBlockIndex).style =
         newRaws.blocks[startBlockIndex].type;
       setEditorState(editorState);
-      socket.emit('editEvent', {
-        id: note.id,
-        style: content.getBlock(startBlockIndex).style,
-        type: 'changeStyle',
-        block: content.getBlock(startBlockIndex).uId,
-        cursor: null,
-      });
+      // socket.emit('editEvent', {
+      //   id: note.id,
+      //   style: content.getBlock(startBlockIndex).style,
+      //   type: 'changeStyle',
+      //   block: content.getBlock(startBlockIndex).uId,
+      //   cursor: null,
+      // });
     } else {
       handleSingleBlockEditing(
         newRaws.blocks[startBlockIndex].text,
@@ -299,7 +284,7 @@ const DraftJSRichTextEditor = ({ url }) => {
         rowDiff,
       };
     } else {
-      console.log('No status');
+      // console.log('No status');
       handled = false;
     }
     return { socketEvent, handled, rowDiff };
@@ -328,7 +313,7 @@ const DraftJSRichTextEditor = ({ url }) => {
       if (selection) {
         let res = handleDiff(newText, targetBlock, sIndex);
         socketEvent = res.socketEvent;
-        console.log(socketEvent);
+        // console.log(socketEvent);
         handled = res.handled;
         rowDiff = res.rowDiff;
       }
@@ -341,8 +326,7 @@ const DraftJSRichTextEditor = ({ url }) => {
       );
       // Selection means only default operation needs to be send
       if (handled && selection) {
-        console.log('?????????????????');
-        console.log(socketEvent.target);
+        // console.log(socketEvent.target);
         socket.emit('editEvent', {
           id: note.id,
           ...socketEvent,
@@ -380,6 +364,34 @@ const DraftJSRichTextEditor = ({ url }) => {
 
   const toggleBlockType = (blockType) => {
     console.log('change');
+    const startBlockKey = editorState.getSelection().getStartKey();
+    const endBlockKey = editorState.getSelection().getEndKey();
+    const startBlockIndex = editorState
+      .getCurrentContent()
+      .getBlockMap()
+      .keySeq()
+      .findIndex((k) => k === startBlockKey);
+    const endBlockIndex = editorState
+      .getCurrentContent()
+      .getBlockMap()
+      .keySeq()
+      .findIndex((k) => k === endBlockKey);
+    let blocks = content.getSelectionBlock(startBlockIndex, endBlockIndex);
+    let targetType = blockType;
+    if (blocks.length === 1) {
+      if (
+        editorState.getCurrentContent().getBlocksAsArray()[startBlockIndex]
+          .type === blockType
+      ) {
+        targetType = 'unstyled';
+      }
+    }
+    socket.emit('editEvent', {
+      type: 'changeStyle',
+      id: note.id,
+      style: targetType,
+      blocks,
+    });
     onChange(RichUtils.toggleBlockType(editorState, blockType));
   };
 
@@ -441,7 +453,10 @@ const DraftJSRichTextEditor = ({ url }) => {
         if (e.key === 'Backspace') return 'handled';
       }
     }
-    const style = raws.blocks[startBlockIndex].type;
+    const style =
+      raws.blocks[startBlockIndex].text === ''
+        ? 'unstyled'
+        : raws.blocks[startBlockIndex].type;
 
     if (e.key === 'Enter') {
       const newText = raws.blocks[startBlockIndex].text.slice(0, startIndex);
@@ -514,7 +529,6 @@ const DraftJSRichTextEditor = ({ url }) => {
         block: targetBlock,
         blockDiff: -1,
       });
-      // }
       return 'handled';
     }
     return getDefaultKeyBinding(e);
@@ -612,7 +626,10 @@ const DraftJSRichTextEditor = ({ url }) => {
         );
       } else {
         // Create block
-        blockId = createBlock(blockIndex - 1);
+        blockId = createBlock(
+          blockIndex - 1,
+          raws.blocks[startBlockIndex].type
+        );
         // Handle the block text
         insertText = handleSingleBlockEditing(blocks[i], 0, blockIndex);
       }
@@ -656,6 +673,7 @@ const DraftJSRichTextEditor = ({ url }) => {
       insertNext: insertKeys.next,
       deleteType: deleteKeys.type,
       deleteKeys: deleteKeys.target,
+      style: raws.blocks[startBlockIndex].type,
     });
     return true;
   };
@@ -702,61 +720,68 @@ const DraftJSRichTextEditor = ({ url }) => {
   };
 
   const focus = () => {
-    // editorRef.current.focus();
+    editorRef.current.focus();
   };
 
   return (
     <Fragment>
-      {/* <button
-        onClick={() => {
-          console.log(content.showStructure());
-          console.log(content.blocks.next.showStructure());
-        }}>
-        Show Structure
-      </button> */}
       {editorState ? (
-        <div
-          className="RichEditor-root"
-          style={{
-            fontFamily:
-              noteFont === 'Mono'
-                ? 'monospace'
-                : noteFont === 'Default'
-                ? 'Georgia , serif'
-                : 'serif',
-          }}
-          // noteFont === 'mono' ? 'monospace' : noteFont === 'default'?
-        >
-          <BlockStyleControls
-            editorState={editorState}
-            onToggle={toggleBlockType}
-          />
-          <InlineStyleControls
-            editorState={editorState}
-            onToggle={toggleInlineStyle}
-          />
+        <>
           <div
-            className={'RichEditor-editor'}
-            onClick={focus}
-            style={{ position: 'relative', zIndex: '100' }}>
-            <Editor
-              readOnly={readOnly}
-              blockStyleFn={getBlockStyle}
-              customStyleMap={styleMap}
+            style={{
+              position: 'fixed',
+              backgroundColor: '#fff',
+              backfaceVisibility: 'hidden',
+              // textAlign: 'center',
+              // marginLeft: '30px',
+              height: '40px',
+              top: '70px',
+              width: '100%',
+              zIndex: 500,
+            }}>
+            <BlockStyleControls
               editorState={editorState}
-              handleKeyCommand={handleKeyCommand}
-              onChange={onChange}
-              onTab={onTab}
-              keyBindingFn={keyBindingFn}
-              handlePastedText={handlePastedText}
-              blockRenderMap={extendedBlockRenderMap}
-              blockRendererFn={myBlockRenderer}
-              // placeholder="Tell a story..."
-              ref={editorRef}
-              spellCheck={true}
+              onToggle={toggleBlockType}
             />
           </div>
-        </div>
+          <div
+            className="RichEditor-root"
+            style={{
+              fontFamily:
+                noteFont === 'Mono'
+                  ? 'monospace'
+                  : noteFont === 'Default'
+                  ? 'Georgia , serif'
+                  : 'serif',
+            }}>
+            <div style={{ height: '30px' }}></div>
+            {/* <InlineStyleControls
+            editorState={editorState}
+            onToggle={toggleInlineStyle}
+          /> */}
+            <div
+              className={'RichEditor-editor'}
+              onClick={focus}
+              style={{ position: 'relative', zIndex: '100' }}>
+              <Editor
+                readOnly={readOnly}
+                blockStyleFn={getBlockStyle}
+                customStyleMap={styleMap}
+                editorState={editorState}
+                handleKeyCommand={handleKeyCommand}
+                onChange={onChange}
+                onTab={onTab}
+                keyBindingFn={keyBindingFn}
+                handlePastedText={handlePastedText}
+                blockRenderMap={extendedBlockRenderMap}
+                blockRendererFn={myBlockRenderer}
+                // placeholder="Tell a story..."
+                ref={editorRef}
+                spellCheck={true}
+              />
+            </div>
+          </div>
+        </>
       ) : (
         <Box
           sx={{
