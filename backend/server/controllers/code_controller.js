@@ -28,7 +28,8 @@ const executeCode = async (req, res) => {
       fs.rm(fileDir, (error) => {
         if (error) console.log(error);
         if (err) {
-          return res.send({ status: 'error', output: stderr });
+          console.log(err);
+          return res.send({ status: 'error', output: stdout + err });
         }
         res.send({ status: 'success', output: stdout });
       });

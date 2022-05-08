@@ -1,1 +1,1 @@
-docker run --rm -v $(pwd)/scripts/$1:/execute.js node:16-alpine node /execute.js
+docker run --rm --ulimit cpu=2 --memory="20m" --cpus=".05" -v $(pwd)/scripts/$1:/execute.js node:16-alpine node /execute.js
