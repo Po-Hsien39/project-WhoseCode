@@ -14,6 +14,7 @@ import {
 import { useState, useEffect, Fragment } from 'react';
 import { useStatus } from '../../hook/useStatus';
 import { useNavigate } from 'react-router-dom';
+import { useSnackbar } from '../../hook/useSnackbar';
 import PublicIcon from '@mui/icons-material/Public';
 import CreateIcon from '@mui/icons-material/Create';
 const Create = ({ open, setOpen, page, setPage }) => {
@@ -117,6 +118,7 @@ const Page1 = ({ setPage }) => {
 };
 
 const Page2 = ({ setPage }) => {
+  const { showMessage } = useSnackbar();
   const { createNoteDetails, setCreateNoteDetails } = useStatus();
   useEffect(() => {
     console.log(createNoteDetails);
@@ -214,6 +216,9 @@ const Page2 = ({ setPage }) => {
             },
           }}
           onClick={() => {
+            console.log(createNoteDetails);
+            if (!createNoteDetails.title.trim())
+              return showMessage('Please enter a title for your note', 'error');
             setPage({ page: 3, type: 'next' });
           }}>
           Next

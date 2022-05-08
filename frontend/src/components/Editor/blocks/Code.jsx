@@ -5,6 +5,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DownloadIcon from '@mui/icons-material/Download';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useSnackbar } from '../../../hook/useSnackbar';
+import CircularProgress from '@mui/material/CircularProgress';
 import copy from 'copy-text-to-clipboard';
 import axios from 'axios';
 
@@ -22,6 +23,7 @@ const CodeWrapper = (props) => {
   const [codeLanguage, setCodeLanguage] = useState('javascript');
   const [copied, setCopied] = useState(false);
   const [executing, setExecuting] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
   const { showMessage } = useSnackbar();
 
   const getCode = async (e) => {
@@ -38,13 +40,18 @@ const CodeWrapper = (props) => {
   };
 
   const execCode = async (e) => {
+    setIsRunning(true);
     setExecuting(true);
     const codeBlock = await getCode(e);
     console.log(codeBlock);
-    let res = await axios.post('http://localhost:3000/api/1.0/code', {
-      code: codeBlock,
-      language: codeLanguage,
-    });
+    let res = await axios.post(
+      import.meta.env.VITE_APP_DOMAIN + '/api/1.0/code',
+      {
+        code: codeBlock,
+        language: codeLanguage,
+      }
+    );
+    setIsRunning(false);
     setCodeResult(res.data.output);
   };
 
@@ -91,9 +98,7 @@ const CodeWrapper = (props) => {
       sx={{
         position: 'relative',
         marginBottom: '20px',
-        // marginTop: '20px',
         zIndex: 100,
-        // display: props.delete ? 'none' : 'block',
       }}
       onMouseEnter={() => setShowFunc(true)}
       onMouseLeave={() => setShowFunc(false)}>
@@ -110,15 +115,17 @@ const CodeWrapper = (props) => {
             transform: 'translateY(3px)',
             transition: 'all 10s ease',
           }}>
-          {/* <Grid item xs={12} md={0.5}></Grid> */}
-          <Grid item xs={12} md={2} sx={{ marginLeft: '20px' }}>
+          <Grid
+            item
+            xs={12}
+            md={2}
+            sx={{ marginLeft: '20px' }}
+            contentEditable={false}>
             <select
               id="language-selection"
               onChange={(e) => setCodeLanguage(e.target.value)}>
-              value={codeLanguage}
               <option value="javascript">Javascript</option>
               <option value="python">Python</option>
-              <option value="c++">C++</option>
             </select>
           </Grid>
           <Grid item xs={12} md={7.75}></Grid>
@@ -131,11 +138,19 @@ const CodeWrapper = (props) => {
                 display: 'flex',
                 justifyContent: 'space-around',
               }}>
-              <Tooltip title="Run Code" placement="top">
-                <IconButton onClick={(e) => execCode(e)}>
-                  <PlayArrowIcon />
-                </IconButton>
-              </Tooltip>
+              {!isRunning ? (
+                <Tooltip title="Run Code" placement="top">
+                  <IconButton onClick={(e) => execCode(e)}>
+                    <PlayArrowIcon />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <CircularProgress
+                  color="secondary"
+                  size="35px"
+                  sx={{ marginRight: '15px' }}
+                />
+              )}
               <Tooltip title={copied ? 'Copied' : 'Copy'} placement="top">
                 <IconButton onClick={(e) => copyCode(e)}>
                   <ContentCopyIcon />

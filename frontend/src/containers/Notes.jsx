@@ -422,7 +422,7 @@ export default function PersistentDrawerLeft() {
           <IconButton
             size="small"
             fontSize="small"
-            sx={{ marginLeft: '120px' }}
+            sx={{ marginLeft: '130px' }}
             onClick={createNote}>
             <AddIcon />
           </IconButton>
