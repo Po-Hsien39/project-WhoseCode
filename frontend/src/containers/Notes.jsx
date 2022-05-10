@@ -374,8 +374,13 @@ export default function PersistentDrawerLeft() {
         </DrawerHeader>
         <Divider />
         <List>
-          {['Home', 'Logout'].map((text) => (
-            <MyList title={text} key={text} setRightopen={setRightopen} />
+          {['Home', 'Add Note', 'Logout'].map((text) => (
+            <MyList
+              title={text}
+              key={text}
+              setRightopen={setRightopen}
+              createNote={createNote}
+            />
           ))}
         </List>
         {notes.collect?.length ? (
@@ -422,7 +427,7 @@ export default function PersistentDrawerLeft() {
           <IconButton
             size="small"
             fontSize="small"
-            sx={{ marginLeft: '120px' }}
+            sx={{ marginLeft: '129px' }}
             onClick={createNote}>
             <AddIcon />
           </IconButton>
