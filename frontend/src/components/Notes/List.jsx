@@ -16,6 +16,7 @@ import {
   Home as HomeIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material';
+import CreateIcon from '@mui/icons-material/Create';
 import { useEffect, useState } from 'react';
 import { useStatus } from '../../hook/useStatus';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +24,7 @@ import { useSnackbar } from '../../hook/useSnackbar';
 import Trash from './Trash';
 import Export from './Export';
 
-const List = ({ type, title, id, star, setRightopen, url }) => {
+const List = ({ type, title, id, star, setRightopen, url, createNote }) => {
   const [onHover, setOnHover] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const {
@@ -69,14 +70,8 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
   const iconPicker = (text) => {
     if (text === 'Home') {
       return <HomeIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />;
-    } else if (text === 'Quick Find') {
-      return <SearchIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />;
-    } else if (text === 'All Updates') {
-      return (
-        <AccessAlarmIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />
-      );
-    } else if (text === 'Setting') {
-      return <SettingsIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />;
+    } else if (text === 'Add Note') {
+      return <CreateIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />;
     } else if (text === 'Trash') {
       return <DeleteIcon sx={{ marginLeft: '15px', marginRight: '10px' }} />;
     } else if (text === 'Export') {
@@ -113,6 +108,8 @@ const List = ({ type, title, id, star, setRightopen, url }) => {
       setExportOpen(true);
     } else if (title === 'Logout') {
       setOpenLogout(true);
+    } else if (title === 'Add Note') {
+      createNote();
     } else {
       console.log('Function not support');
     }

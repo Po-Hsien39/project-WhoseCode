@@ -216,20 +216,14 @@ const DraftJSRichTextEditor = ({ url }) => {
       content.getBlock(startBlockIndex).style =
         newRaws.blocks[startBlockIndex].type;
       setEditorState(editorState);
-      // socket.emit('editEvent', {
-      //   id: note.id,
-      //   style: content.getBlock(startBlockIndex).style,
-      //   type: 'changeStyle',
-      //   block: content.getBlock(startBlockIndex).uId,
-      //   cursor: null,
-      // });
     } else {
       handleSingleBlockEditing(
         newRaws.blocks[startBlockIndex].text,
         startIndex,
         startBlockIndex,
         selectionState,
-        true
+        true,
+        editorState
       );
     }
   };
@@ -289,15 +283,14 @@ const DraftJSRichTextEditor = ({ url }) => {
     }
     return { socketEvent, handled, rowDiff };
   };
-
   const handleSingleBlockEditing = (
     newText,
     sIndex,
     blockIndex,
     selection,
-    requiredChange = true
+    requiredChange = true,
+    editorState
   ) => {
-    // console.log(content.showStructure());
     let socketEvent = {};
     let handled = true;
     let targetBlock = content.getBlock(blockIndex);
@@ -305,20 +298,18 @@ const DraftJSRichTextEditor = ({ url }) => {
     if (!selection) {
       let res = handleDiff(newText, targetBlock, sIndex);
       socketEvent = res.socketEvent;
-      console.log(socketEvent);
       handled = res.handled;
       rowDiff = res.rowDiff;
     }
-    setEditorState((editorState) => {
+    setEditorState((newEditorState) => {
       if (selection) {
         let res = handleDiff(newText, targetBlock, sIndex);
         socketEvent = res.socketEvent;
-        // console.log(socketEvent);
         handled = res.handled;
         rowDiff = res.rowDiff;
       }
 
-      let newRaws = convertToRaw(editorState.getCurrentContent());
+      let newRaws = convertToRaw(newEditorState.getCurrentContent());
       newRaws.blocks[blockIndex].text = targetBlock.getContent();
       const editor = EditorState.createWithContent(
         convertFromRaw(newRaws),
@@ -333,20 +324,22 @@ const DraftJSRichTextEditor = ({ url }) => {
           stopHandleCursor: !requiredChange,
         });
       }
+      console.log(socketEvent);
+      if (!socketEvent.type && editorState) return editorState;
       return EditorState.forceSelection(
-        handled ? editor : editorState,
+        handled ? editor : newEditorState,
         selection ||
           (!requiredChange || !handled
-            ? editorState.getSelection()
-            : editorState
+            ? newEditorState.getSelection()
+            : newEditorState
                 .getSelection()
                 .set(
                   'anchorOffset',
-                  editorState.getSelection().getAnchorOffset() + rowDiff
+                  newEditorState.getSelection().getAnchorOffset() + rowDiff
                 )
                 .set(
                   'focusOffset',
-                  editorState.getSelection().getFocusOffset() + rowDiff
+                  newEditorState.getSelection().getFocusOffset() + rowDiff
                 ))
       );
     });
@@ -354,7 +347,7 @@ const DraftJSRichTextEditor = ({ url }) => {
   };
 
   const handleKeyCommand = (command, editorState) => {
-    console.log(command);
+    // console.log(command);
   };
 
   const onTab = (e) => {
@@ -395,18 +388,18 @@ const DraftJSRichTextEditor = ({ url }) => {
     onChange(RichUtils.toggleBlockType(editorState, blockType));
   };
 
-  const toggleInlineStyle = (inlineStyle) => {
-    // console.log(inlineStyle);
-    // console.log(
-    //   convertToRaw(
-    //     RichUtils.toggleInlineStyle(
-    //       editorState,
-    //       inlineStyle
-    //     ).getCurrentContent()
-    //   )
-    // );
-    onChange(RichUtils.toggleInlineStyle(editorState, inlineStyle));
-  };
+  // const toggleInlineStyle = (inlineStyle) => {
+  // console.log(inlineStyle);
+  // console.log(
+  //   convertToRaw(
+  //     RichUtils.toggleInlineStyle(
+  //       editorState,
+  //       inlineStyle
+  //     ).getCurrentContent()
+  //   )
+  // );
+  // onChange(RichUtils.toggleInlineStyle(editorState, inlineStyle));
+  // };
 
   const keyBindingFn = (e) => {
     // Multi block operation
@@ -499,7 +492,6 @@ const DraftJSRichTextEditor = ({ url }) => {
       e.key === 'Backspace' &&
       startBlockIndex !== 0 && // if cursor is not at the start of the first block
       startIndex === 0 && // if cursor is at the start of the block
-      // raws.blocks[startBlockIndex].type === 'unstyled' && // This is not remove style
       endIndex === 0
     ) {
       // if (backspaceRemoveType(style)) {
@@ -543,7 +535,6 @@ const DraftJSRichTextEditor = ({ url }) => {
     });
   };
   // const changeStyle = (blockIndex, style) => {
-  //   console.log('change');
   //   let targetBlock = content.getBlock(blockIndex);
   //   targetBlock.style = style;
   //   setEditorState((editorState) => {
@@ -681,6 +672,7 @@ const DraftJSRichTextEditor = ({ url }) => {
   const createBlock = (startBlockIndex, style = 'unstyled') => {
     let newId = content.createBlock({ startBlockIndex, style });
     setEditorState((editorState) => {
+      console.log(editorState);
       let blocks = editorState.getCurrentContent().getBlocksAsArray();
       let newBlocks = createNewBlock(blocks, startBlockIndex, style);
       let currentId = newBlocks[startBlockIndex + 1].key;
@@ -732,8 +724,6 @@ const DraftJSRichTextEditor = ({ url }) => {
               position: 'fixed',
               backgroundColor: '#fff',
               backfaceVisibility: 'hidden',
-              // textAlign: 'center',
-              // marginLeft: '30px',
               height: '40px',
               top: '70px',
               width: '100%',
@@ -762,7 +752,7 @@ const DraftJSRichTextEditor = ({ url }) => {
             <div
               className={'RichEditor-editor'}
               onClick={focus}
-              style={{ position: 'relative', zIndex: '100' }}>
+              style={{ position: 'relative', zIndex: '100', maxWidth: '100%' }}>
               <Editor
                 readOnly={readOnly}
                 blockStyleFn={getBlockStyle}
