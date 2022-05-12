@@ -247,38 +247,40 @@ export default function PersistentDrawerLeft() {
           </IconButton>
         </Tooltip>
         {!otherNotesPermission.status ? (
-          <Tooltip title="View Version" placement="bottom">
-            <IconButton
-              onClick={() => {
-                console.log(rightDrawerType);
-                if (rightDrawerType === 'version')
-                  setRightopen((prev) => !prev);
-                else setRightopen(true);
-                setRightDrawerType('version');
-              }}>
-              <AccessAlarmIcon />
-            </IconButton>
-          </Tooltip>
+          <>
+            <Tooltip title="View Version" placement="bottom">
+              <IconButton
+                onClick={() => {
+                  console.log(rightDrawerType);
+                  if (rightDrawerType === 'version')
+                    setRightopen((prev) => !prev);
+                  else setRightopen(true);
+                  setRightDrawerType('version');
+                }}>
+                <AccessAlarmIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              title={
+                !otherNotesPermission.status
+                  ? 'Add to Collection'
+                  : 'Send star to the author'
+              }
+              placement="bottom">
+              <IconButton
+                onClick={() => {
+                  if (note.id) editFavorite();
+                  else showMessage('Please select a note', 'error');
+                }}>
+                {!note.star ? (
+                  <StarBorderIcon />
+                ) : (
+                  <StarIcon sx={{ color: '#F6C050' }} />
+                )}
+              </IconButton>
+            </Tooltip>
+          </>
         ) : null}
-        <Tooltip
-          title={
-            !otherNotesPermission.status
-              ? 'Add to Collection'
-              : 'Send star to the author'
-          }
-          placement="bottom">
-          <IconButton
-            onClick={() => {
-              if (note.id) editFavorite();
-              else showMessage('Please select a note', 'error');
-            }}>
-            {!note.star ? (
-              <StarBorderIcon />
-            ) : (
-              <StarIcon sx={{ color: '#F6C050' }} />
-            )}
-          </IconButton>
-        </Tooltip>
         <Tooltip title="Other Settings" placement="bottom">
           <IconButton
             onClick={(e) => {

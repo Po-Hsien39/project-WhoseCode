@@ -726,7 +726,6 @@ const DraftJSRichTextEditor = ({ url }) => {
               backfaceVisibility: 'hidden',
               height: '40px',
               top: '70px',
-              width: '100%',
               zIndex: 500,
             }}>
             <BlockStyleControls

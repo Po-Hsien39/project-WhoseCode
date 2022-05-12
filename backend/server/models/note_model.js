@@ -8,12 +8,14 @@ const getNote = async (noteUrl, requireUser) => {
   WHERE a.id = b.noteId and a.url = ? and b.userId = ?`,
     [noteUrl, requireUser]
   );
-
+  // If the user is not in the note's permission list
   if (!res) {
-    const [[{ id: noteId, title }]] = await pool.query(
-      `SELECT id, title  FROM notes WHERE url = ?`,
+    const [[response]] = await pool.query(
+      `SELECT id, title, deleted FROM notes WHERE url = ?`,
       [noteUrl]
     );
+    if (!response || response.deleted) return { error: 'NOT_FOUND' };
+    const { id: noteId, title } = response;
     let { permission, latest } = await Note.findById(noteId);
     if (!permission.openToPublic) {
       return { error: 'PERMISSION_DENIED' };
