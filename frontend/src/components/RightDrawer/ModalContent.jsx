@@ -37,7 +37,7 @@ const ModalContent = ({
 };
 
 const RollBackModal = ({ setOpen, setVersions }) => {
-  const { request, note, versionNote } = useStatus();
+  const { request, note, versionNote, socket } = useStatus();
   const { showMessage } = useSnackbar();
   const rollbackversion = async () => {
     setOpen(false);
@@ -48,6 +48,10 @@ const RollBackModal = ({ setOpen, setVersions }) => {
     );
     setVersions((versions) => versions.slice(0, versionNote.version));
     showMessage('Rollback success');
+    // Update Current note to specific Version
+    socket.emit('changeRoom', {
+      noteId: note.id,
+    });
   };
 
   return (

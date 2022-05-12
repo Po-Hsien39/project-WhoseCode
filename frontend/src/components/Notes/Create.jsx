@@ -142,10 +142,7 @@ const Page2 = ({ setPage }) => {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            marginTop: '15px',
-            position: 'absolute',
-            right: '20px',
-            top: '18px',
+            marginLeft: 'auto',
           }}>
           <Typography fontWeight={'bold'} fontSize={14} variant="h8">
             Favorite?

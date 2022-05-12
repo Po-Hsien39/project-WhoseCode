@@ -22,7 +22,7 @@ import UndoIcon from '@mui/icons-material/Undo';
 import { useEffect } from 'react';
 
 export default function Setting({ open, setOpen, anchor, setAnchor }) {
-  const { user } = useStatus();
+  const { user, otherNotesPermission } = useStatus();
   const handleClose = () => {
     setOpen(false);
   };
@@ -53,17 +53,29 @@ export default function Setting({ open, setOpen, anchor, setAnchor }) {
         </Grid>
         <Divider />
 
-        {[
-          'Copy Link',
-          'Check Comments',
-          'View Version',
-          'Export',
-          'Logout',
-        ].map((option) => {
-          return (
-            <SettingOption key={option} option={option} setOpen={setOpen} />
-          );
-        })}
+        {otherNotesPermission.status
+          ? ['Copy Link', 'Check Comments', 'Export', 'Logout'].map(
+              (option) => {
+                return (
+                  <SettingOption
+                    key={option}
+                    option={option}
+                    setOpen={setOpen}
+                  />
+                );
+              }
+            )
+          : [
+              'Copy Link',
+              'Check Comments',
+              'View Version',
+              'Export',
+              'Logout',
+            ].map((option) => {
+              return (
+                <SettingOption key={option} option={option} setOpen={setOpen} />
+              );
+            })}
         <Divider />
         <Box sx={{ padding: '10px 15px' }}>
           <Typography variant="h8" sx={{ color: '#7D7C78', fontSize: 12 }}>
