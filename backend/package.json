@@ -9,14 +9,17 @@
     ]
   },
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "test": "NODE_ENV=test mocha 'test/*.js' --exit"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "chai": "^4.3.6",
     "cors": "^2.8.5",
     "dotenv-defaults": "^5.0.0",
     "express": "^4.17.3",
     "jsonwebtoken": "^8.5.1",
+    "mocha": "^10.0.0",
     "mongoose": "^6.3.0",
     "morgan-body": "^2.6.6",
     "mysql2": "^2.3.3",

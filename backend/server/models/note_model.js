@@ -153,8 +153,6 @@ const updateContributor = async (noteId, email, permission) => {
 };
 
 const deleteContributor = async (noteId, email) => {
-  console.log('????????????');
-  console.log(noteId, email);
   await pool.query(
     'DELETE FROM permission WHERE noteId = ? and userId = (SELECT id FROM user WHERE email = ?)',
     [noteId, email]
